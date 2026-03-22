@@ -202,8 +202,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           TAURI_BUNDLER_NEW_APPIMAGE_FORMAT: true
-          # Signing env vars omitted — add when certificates are configured:
-          # TAURI_SIGNING_PRIVATE_KEY, APPLE_CERTIFICATE, APPLE_SIGNING_IDENTITY, etc.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Apple signing — add when certificate is configured:
+          # APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, etc.
 
   # ─── 4. Build Desktop (Electron) ──────────────────────────────────
   build-electron:

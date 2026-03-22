@@ -3,7 +3,7 @@
   "productName": "Orbi",
   "identifier": "com.orbi.desktop",
   "bundle": {
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/prod/32x32.png",
       "icons/prod/128x128.png",
@@ -31,8 +31,8 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYwMDM5Nzg5OUMzOUExMDQKUldRRW9UbWNpWmNEOENYT01CV0lhOXR1UFhpaXJsK1Z3aU9lZnNtNzE0TDROWVMwVW9XQnFOelkK",
-      "endpoints": ["https://github.com/anomalyco/orbi/releases/latest/download/latest.json"]
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg5ODE0NUM3NTM2RjdBRTUKUldUbGVtOVR4MFdCaWVsNW9jOEs0QkVHb2ZFOXl5WDNGYU9xZkZBUjAvTnpZczdKTStYOXU4Z00K",
+      "endpoints": ["https://github.com/arqxus-flow/Aqxus_Agent/releases/latest/download/latest.json"]
     }
   }
 }
