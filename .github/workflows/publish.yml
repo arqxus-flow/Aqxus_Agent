@@ -174,26 +174,19 @@ jobs:
         timeout-minutes: 60
         with:
           projectPath: packages/desktop
-          uploadWorkflowArtifacts: true
           tauriScript: ${{ (runner.os == 'Linux' && 'cargo tauri') || '' }}
           args: --target ${{ matrix.settings.target }} --config ./src-tauri/tauri.prod.conf.json --verbose
           updaterJsonPreferNsis: true
           releaseId: ${{ needs.version.outputs.release }}
           tagName: ${{ needs.version.outputs.tag }}
           releaseDraft: true
-          releaseAssetNamePattern: orbi-desktop-[platform]-[arch][ext]
+          assetNamePattern: orbi-desktop-[platform]-[arch][ext]
           releaseCommitish: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           TAURI_BUNDLER_NEW_APPIMAGE_FORMAT: true
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-          APPLE_API_KEY_PATH: ${{ runner.temp }}/apple-api-key.p8
+          # Signing env vars omitted — add when certificates are configured:
+          # TAURI_SIGNING_PRIVATE_KEY, APPLE_CERTIFICATE, APPLE_SIGNING_IDENTITY, etc.
 
   # ─── 4. Build Desktop (Electron) ──────────────────────────────────
   build-electron:
@@ -278,6 +271,8 @@ jobs:
         env:
           ORBI_CHANNEL: prod
           GH_TOKEN: ${{ github.token }}
+          # Skip code signing when no certificate is configured
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.APPLE_CERTIFICATE != '' }}
           CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
           CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8

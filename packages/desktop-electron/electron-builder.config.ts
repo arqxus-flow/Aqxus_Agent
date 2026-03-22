@@ -77,7 +77,7 @@ function getConfig() {
         appId: "com.orbi.desktop.beta",
         productName: "Orbi Beta",
         protocols: { name: "Orbi Beta", schemes: ["orbi"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "orbi-beta", channel: "latest" },
+        publish: { provider: "github", owner: "arqxus-flow", repo: "Aqxus_Agent", channel: "latest" },
         rpm: { packageName: "orbi-beta" },
       }
     }
@@ -87,7 +87,7 @@ function getConfig() {
         appId: "com.orbi.desktop",
         productName: "Orbi",
         protocols: { name: "Orbi", schemes: ["orbi"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "orbi", channel: "latest" },
+        publish: { provider: "github", owner: "arqxus-flow", repo: "Aqxus_Agent", channel: "latest" },
         rpm: { packageName: "orbi" },
       }
     }
