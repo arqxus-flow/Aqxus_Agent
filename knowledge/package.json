@@ -1,0 +1,10 @@
+{
+  "name": "knowledge",
+  "version": "1.0.0",
+  "description": "Scripts de seed e hooks para Cortex Graph API",
+  "scripts": {
+    "seed": "export $(grep -v '^#' .env | xargs) && node scripts/seed-cortex-graph.js"
+  },
+  "type": "commonjs",
+  "dependencies": {}
+}
