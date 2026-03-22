@@ -219,7 +219,9 @@ const createPlatform = (): Platform => {
       await window.api.setDisplayBackend(backend)
     },
 
-    parseMarkdown: (markdown: string) => window.api.parseMarkdownCommand(markdown),
+    // Disabled: native parser has entity escaping issues with tables.
+    // Falls back to jsParser (same as web) which handles everything correctly.
+    // parseMarkdown: (markdown: string) => window.api.parseMarkdownCommand(markdown),
 
     webviewZoom,
 
