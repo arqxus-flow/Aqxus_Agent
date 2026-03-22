@@ -14,6 +14,6 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 # Roda seed em background para nao bloquear o Claude
-node "$SCRIPT_DIR/seed-cortex-graph.js" "/Users/arthuraquino/Innutri/Pipeline/Pipeline Get ERP" > /dev/null 2>&1 &
+node "$SCRIPT_DIR/seed-cortex-graph.js" "/Users/arthuraquino/opencode" > /dev/null 2>&1 &
 
 exit 0
