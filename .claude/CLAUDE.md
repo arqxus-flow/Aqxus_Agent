@@ -1,86 +1,108 @@
-# Orbi - Claude Code Context
+# Orbi
 
-## Projeto
-Fork do OpenCode renomeado para **Orbi**. Agente de IA para gestão empresarial.
+Fork do OpenCode renomeado para **Orbi**. Agente de IA para gestao empresarial.
 
 - **Repo:** https://github.com/arqxus-flow/Aqxus_Agent
 - **Branch:** main
-- **Produto:** Orbi (CLI + Web + Desktop)
-- **Domínio:** orbicowork.arqxus.com
 - **Namespace:** @orbi
 - **Runtime:** Bun
-- **Log de mudanças:** FORK_LOG.md (gitignored, local)
+- **Log de mudancas:** FORK_LOG.md (gitignored, local)
+
+## Stack
+
+Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel AI SDK (LLM) + Zod (validacao) + Tauri/Electron (desktop)
+
+## Commands
+
+- `cd packages/orbi && bun run script/build.ts --single` — build CLI (binario nativo)
+- `cd packages/orbi && bun typecheck` — typecheck (nunca do root)
+- `cd packages/orbi && bun test` — testes (nunca do root)
+- `bun install` — instalar dependencias
+- `cd knowledge && npm run seed -- /Users/arthuraquino/opencode` — reseed Cortex Graph
 
 ## Estrutura principal
 
 ```
-packages/orbi/       → Core (CLI + servidor + agentes + tools)
-packages/app/        → Web UI (Solid.js)
-packages/desktop/    → Desktop Tauri
+packages/orbi/       → Core (CLI + servidor + agentes + tools + loop principal)
+packages/app/        → Web UI (Solid.js, compartilhada entre web e desktop)
+packages/desktop/    → Desktop Tauri (Mac/Win/Linux)
 packages/desktop-electron/ → Desktop Electron
-packages/ui/         → Componentes compartilhados
-packages/sdk/        → SDK cliente
+packages/ui/         → Componentes UI compartilhados
+packages/sdk/        → SDK cliente TypeScript
 packages/plugin/     → Sistema de plugins
-packages/util/       → Utilitários
+packages/util/       → Utilitarios
+packages/web/        → Site docs (Astro)
 ```
 
-## Build
+## Nao faca
 
-```bash
-cd packages/orbi
-bun run script/build.ts --single    # compila CLI pro sistema atual
-```
+- NAO buildar ou rodar typecheck/testes do root — sempre de dentro do package
+- NAO renomear pacotes externos no rebrand (ex: `@gitlab/opencode-gitlab-auth`)
+- NAO mexer em `packages/enterprise` ou `packages/function` por enquanto
+- NAO commitar sem rodar build antes
+- NAO fazer push sem `--no-verify` se husky bloquear por packages removidos
 
-Binário: `packages/orbi/dist/orbi-darwin-arm64/bin/orbi`
+## Fluxo de Trabalho
 
-Typecheck: `bun typecheck` (rodar de dentro do package, nunca do root)
+### Classificacao
+- **Simples** — fix, chore, mudanca isolada (1 arquivo, sem planning)
+- **Medio** — feature auto-contida, refactor localizado (plan mode primeiro)
+- **Grande** — feature complexa, multiplas partes
 
-Testes: rodar de dentro dos packages, não do root.
+### Simples
+1. Implementar direto
+2. Build: `cd packages/orbi && bun run script/build.ts --single`
+3. Commit + push
 
-## Style Guide (do AGENTS.md original)
+### Medio
+1. Plan mode — explorar codigo, desenhar approach
+2. Implementar
+3. Build + typecheck
+4. Atualizar docs (CLAUDE.md, rules, FORK_LOG.md) se necessario
+5. Commit + push
 
-- Nomes curtos: `cfg`, `err`, `opts`, `dir`, `root`
-- `const` > `let`. Ternários > reassignment
-- Sem `else` — early return
-- Sem `try/catch` desnecessário
-- Sem `any`
-- Bun APIs quando possível (`Bun.file()`, `bun:sqlite`)
-- Functional array methods > for loops
-- Snake_case em schemas Drizzle
-- Sem mocks em testes
+### Grande
+1. Plan mode — desenhar plano completo
+2. Implementar em etapas (commit por etapa)
+3. Build + typecheck a cada etapa
+4. Atualizar docs
+5. Push
 
-## Cortex Graph (contexto automático)
+## Regras Git
+
+- Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`
+- Commitar frequente, mudancas pequenas
+- Push com `--no-verify` se husky bloquear
+- Atualizar FORK_LOG.md com o que foi feito
+
+## Cortex Graph (contexto automatico)
 
 Hooks em `.claude/settings.local.json` injetam contexto do Cortex Graph API automaticamente:
 - **PreToolUse (Read/Edit/Write):** consulta imports e dependentes do arquivo sendo editado
-- **PostToolUse (Edit/Write):** sincroniza grafo após mudanças
+- **PostToolUse (Edit/Write):** sincroniza grafo apos mudancas
 
-Grafo atualizado após remoção do console. Top arquivos por PageRank:
-- `packages/orbi/src/project/instance.ts` (hub central, 111 conexões)
-- `packages/orbi/src/config/config.ts` (configuração)
+Top arquivos por PageRank (hub central do codigo):
+- `packages/orbi/src/project/instance.ts` (111 conexoes)
+- `packages/orbi/src/config/config.ts` (configuracao)
 - `packages/orbi/src/session/prompt.ts` (loop principal do agente)
-- `packages/orbi/src/agent/agent.ts` (definição de agentes)
+- `packages/orbi/src/agent/agent.ts` (definicao de agentes)
+- `packages/orbi/src/tool/registry.ts` (registro de tools)
 
-Reseed: `cd knowledge && npm run seed -- /Users/arthuraquino/opencode`
+## Contexto do negocio
 
-## Contexto do negócio
-
-Orbi é um harness de agente para gestão empresarial:
+Orbi e um harness de agente para gestao empresarial:
 - Cada pessoa roda Orbi local no PC
-- Cloudflare faz parte assíncrona (cron, tarefas, webhooks)
-- MCP servers na Cloudflare com OAuth via Access (padrão Tácito)
+- Cloudflare faz parte assincrona (cron, tarefas, webhooks)
+- MCP servers na Cloudflare com OAuth via Access (padrao Tacito)
 - Sandbox sob demanda para interfaces visuais
 - Banco central (D1/Postgres) como fonte de verdade
 
-## MCPs do Arthur (referência)
+## MCPs do Arthur (referencia)
 
-- **Pipeline ERP** (pipelinegeterp.innutri.work) — Postgres com dados do ERP Maxiprod
-- **Tácito** (Arqxus/Tacito) — Files, folders, tags, search com R2/D1
+- **Pipeline ERP** (pipelinegeterp.innutri.work) — Postgres com dados do ERP Maxiprod, 10 tools MCP
+- **Tacito** (Arqxus/Tacito) — Files, folders, tags, search com R2/D1
 - **Sandbox** (sandbox.innutri.work) — React sob demanda
 
-## Bug conhecido
+## Bugs corrigidos
 
-App desktop (Electron) renderiza tabelas markdown com HTML entities quebradas.
-- `packages/ui/src/context/marked.tsx` — `highlightCodeBlocks()` só unescape dentro de `<pre><code>`
-- `packages/ui/src/components/markdown.tsx` — `innerHTML` mantém entities escapadas
-- TUI e web funcionam perfeito
+- **Desktop markdown tables**: nativeParser desativado em Electron e Tauri. Usa jsParser (igual web). Commit 90dc0a8c8
