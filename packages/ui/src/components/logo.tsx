@@ -5,12 +5,13 @@ export const Mark = (props: { class?: string }) => {
     <svg
       data-component="logo-mark"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 16 20"
+      viewBox="0 0 1024 1024"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path data-slot="logo-logo-mark-shadow" d="M12 16H4V8H12V16Z" fill="var(--icon-weak-base)" />
-      <path data-slot="logo-logo-mark-o" d="M12 4H4V16H12V4ZM16 20H0V0H16V20Z" fill="var(--icon-strong-base)" />
+      <g transform="translate(0,1024) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+        <path d="M3881 6654 c-165 -44 -306 -192 -341 -357 -7 -36 -10 -403 -8 -1197 l3 -1145 23 -56 c50 -124 157 -231 280 -281 l57 -23 1205 -3 c1176 -2 1207 -2 1270 17 118 36 234 131 286 233 54 107 54 93 54 1289 0 711 -4 1125 -10 1160 -33 172 -162 310 -339 363 -49 14 -178 16 -1240 15 -1003 0 -1194 -3 -1240 -15z m1459 -434 c515 -105 880 -551 880 -1074 0 -499 -337 -937 -819 -1063 -119 -31 -318 -42 -442 -23 -342 49 -655 274 -813 580 -136 265 -160 556 -69 845 69 219 230 434 422 564 121 82 313 159 461 184 77 13 288 6 380 -13z"/>
+      </g>
     </svg>
   )
 }
@@ -21,12 +22,13 @@ export const Splash = (props: Pick<ComponentProps<"svg">, "ref" | "class">) => {
       ref={props.ref}
       data-component="logo-splash"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 80 100"
+      viewBox="0 0 1024 1024"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M60 80H20V40H60V80Z" fill="var(--icon-base)" />
-      <path d="M60 20H20V80H60V20ZM80 100H0V0H80V100Z" fill="var(--icon-strong-base)" />
+      <g transform="translate(0,1024) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+        <path d="M3881 6654 c-165 -44 -306 -192 -341 -357 -7 -36 -10 -403 -8 -1197 l3 -1145 23 -56 c50 -124 157 -231 280 -281 l57 -23 1205 -3 c1176 -2 1207 -2 1270 17 118 36 234 131 286 233 54 107 54 93 54 1289 0 711 -4 1125 -10 1160 -33 172 -162 310 -339 363 -49 14 -178 16 -1240 15 -1003 0 -1194 -3 -1240 -15z m1459 -434 c515 -105 880 -551 880 -1074 0 -499 -337 -937 -819 -1063 -119 -31 -318 -42 -442 -23 -342 49 -655 274 -813 580 -136 265 -160 556 -69 845 69 219 230 434 422 564 121 82 313 159 461 184 77 13 288 6 380 -13z"/>
+      </g>
     </svg>
   )
 }
@@ -35,27 +37,12 @@ export const Logo = (props: { class?: string }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 234 42"
+      viewBox="0 0 1024 1024"
       fill="none"
       classList={{ [props.class ?? ""]: !!props.class }}
     >
-      <g>
-        <path d="M18 30H6V18H18V30Z" fill="var(--icon-weak-base)" />
-        <path d="M18 12H6V30H18V12ZM24 36H0V6H24V36Z" fill="var(--icon-base)" />
-        <path d="M48 30H36V18H48V30Z" fill="var(--icon-weak-base)" />
-        <path d="M36 30H48V12H36V30ZM54 36H36V42H30V6H54V36Z" fill="var(--icon-base)" />
-        <path d="M84 24V30H66V24H84Z" fill="var(--icon-weak-base)" />
-        <path d="M84 24H66V30H84V36H60V6H84V24ZM66 18H78V12H66V18Z" fill="var(--icon-base)" />
-        <path d="M108 36H96V18H108V36Z" fill="var(--icon-weak-base)" />
-        <path d="M108 12H96V36H90V6H108V12ZM114 36H108V12H114V36Z" fill="var(--icon-base)" />
-        <path d="M144 30H126V18H144V30Z" fill="var(--icon-weak-base)" />
-        <path d="M144 12H126V30H144V36H120V6H144V12Z" fill="var(--icon-strong-base)" />
-        <path d="M168 30H156V18H168V30Z" fill="var(--icon-weak-base)" />
-        <path d="M168 12H156V30H168V12ZM174 36H150V6H174V36Z" fill="var(--icon-strong-base)" />
-        <path d="M198 30H186V18H198V30Z" fill="var(--icon-weak-base)" />
-        <path d="M198 12H186V30H198V12ZM204 36H180V6H198V0H204V36Z" fill="var(--icon-strong-base)" />
-        <path d="M234 24V30H216V24H234Z" fill="var(--icon-weak-base)" />
-        <path d="M216 12V18H228V12H216ZM234 24H216V30H234V36H210V6H234V24Z" fill="var(--icon-strong-base)" />
+      <g transform="translate(0,1024) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+        <path d="M3881 6654 c-165 -44 -306 -192 -341 -357 -7 -36 -10 -403 -8 -1197 l3 -1145 23 -56 c50 -124 157 -231 280 -281 l57 -23 1205 -3 c1176 -2 1207 -2 1270 17 118 36 234 131 286 233 54 107 54 93 54 1289 0 711 -4 1125 -10 1160 -33 172 -162 310 -339 363 -49 14 -178 16 -1240 15 -1003 0 -1194 -3 -1240 -15z m1459 -434 c515 -105 880 -551 880 -1074 0 -499 -337 -937 -819 -1063 -119 -31 -318 -42 -442 -23 -342 49 -655 274 -813 580 -136 265 -160 556 -69 845 69 219 230 434 422 564 121 82 313 159 461 184 77 13 288 6 380 -13z"/>
       </g>
     </svg>
   )
