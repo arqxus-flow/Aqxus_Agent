@@ -27,8 +27,8 @@ async function main() {
     relPath = filePath.replace(projectDir + '/', '');
   }
 
-  // Ignora arquivos fora de src/, worker/, tests/
-  if (!relPath.startsWith('src/') && !relPath.startsWith('worker/') && !relPath.startsWith('test/') && !relPath.startsWith('tests/')) {
+  // Ignora arquivos fora de src/, worker/, tests/, packages/
+  if (!relPath.startsWith('src/') && !relPath.startsWith('worker/') && !relPath.startsWith('test/') && !relPath.startsWith('tests/') && !relPath.startsWith('packages/')) {
     process.exit(0);
   }
 

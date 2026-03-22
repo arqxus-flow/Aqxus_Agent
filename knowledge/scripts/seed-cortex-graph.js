@@ -16,7 +16,24 @@ const path = require('path');
 const API_URL = process.env.CORTEX_API_URL || 'https://cortex-graph.arqxus.workers.dev';
 const API_KEY = process.env.CORTEX_API_KEY || process.env.CORTEX_GRAPH_API_KEY;
 const PROJECT_DIR = path.resolve(process.argv[2] || '.');
-const SCAN_DIRS = ['src', 'worker', 'test', 'tests'];
+// Detecta monorepo: se tem packages/, scaneia dentro de cada package
+function detectScanDirs(projectDir) {
+  const packagesDir = path.join(projectDir, 'packages');
+  if (fs.existsSync(packagesDir)) {
+    const dirs = [];
+    for (const entry of fs.readdirSync(packagesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const pkgSrc = path.join('packages', entry.name, 'src');
+      if (fs.existsSync(path.join(projectDir, pkgSrc))) dirs.push(pkgSrc);
+      const pkgTest = path.join('packages', entry.name, 'test');
+      if (fs.existsSync(path.join(projectDir, pkgTest))) dirs.push(pkgTest);
+    }
+    if (dirs.length > 0) return dirs;
+  }
+  return ['src', 'worker', 'test', 'tests'];
+}
+
+const SCAN_DIRS = detectScanDirs(PROJECT_DIR);
 
 if (!API_KEY) {
   console.error('Erro: CORTEX_API_KEY nao definida');
@@ -49,21 +66,39 @@ function getDescription(filePath) {
 }
 
 function getFileType(relPath) {
-  if (relPath.startsWith('test/') || relPath.startsWith('tests/')) return 'test';
-  if (relPath.startsWith('worker/routes/') || relPath.startsWith('src/routes/')) return 'route';
-  if (relPath.startsWith('worker/schemas/') || relPath.startsWith('src/schemas/')) return 'schema';
-  if (relPath.startsWith('worker/durable-objects/') || relPath.startsWith('src/durable-objects/')) return 'durable-object';
-  if (relPath.startsWith('src/workflows/')) return 'workflow';
-  if (relPath.startsWith('worker/lib/') || relPath.startsWith('src/lib/')) return 'lib';
-  if (relPath.startsWith('src/components/')) return 'component';
-  if (relPath.startsWith('src/hooks/')) return 'hook';
-  if (relPath.startsWith('src/types/')) return 'type';
-  return 'config';
+  // Normaliza: remove packages/xxx/ prefix pra reutilizar mesma logica
+  const norm = relPath.replace(/^packages\/[^/]+\//, '');
+  if (norm.startsWith('test/') || norm.startsWith('tests/')) return 'test';
+  if (norm.startsWith('worker/routes/') || norm.startsWith('src/routes/') || norm.startsWith('src/server/routes/')) return 'route';
+  if (norm.startsWith('worker/schemas/') || norm.startsWith('src/schemas/')) return 'schema';
+  if (norm.startsWith('worker/durable-objects/') || norm.startsWith('src/durable-objects/')) return 'durable-object';
+  if (norm.startsWith('src/workflows/') || norm.startsWith('src/mcp/')) return 'integration';
+  if (norm.startsWith('src/session/')) return 'core';
+  if (norm.startsWith('src/agent/')) return 'agent';
+  if (norm.startsWith('src/tool/')) return 'tool';
+  if (norm.startsWith('src/provider/')) return 'provider';
+  if (norm.startsWith('src/cli/')) return 'cli';
+  if (norm.startsWith('src/config/')) return 'config';
+  if (norm.startsWith('src/storage/')) return 'storage';
+  if (norm.startsWith('src/permission/')) return 'permission';
+  if (norm.startsWith('worker/lib/') || norm.startsWith('src/lib/')) return 'lib';
+  if (norm.startsWith('src/components/')) return 'component';
+  if (norm.startsWith('src/context/')) return 'context';
+  if (norm.startsWith('src/pages/')) return 'page';
+  if (norm.startsWith('src/hooks/')) return 'hook';
+  if (norm.startsWith('src/types/')) return 'type';
+  return 'lib';
 }
 
 function getEntity(relPath) {
+  // Normaliza: remove packages/xxx/ prefix
+  const norm = relPath.replace(/^packages\/[^/]+\//, '');
+  // Em monorepo, o package name é a entity principal
+  const pkgMatch = relPath.match(/^packages\/([^/]+)\//);
+  const pkgName = pkgMatch ? pkgMatch[1] : null;
   const patterns = [
     { regex: /^(?:worker|src)\/routes\/([^/]+)\//, skip: [] },
+    { regex: /^(?:worker|src)\/server\/routes\/([^/]+)\//, skip: [] },
     { regex: /^(?:worker|src)\/schemas\/([^/]+)\//, skip: ['shared'] },
     { regex: /^(?:worker|src)\/lib\/([^/]+)\//, skip: ['shared'] },
     { regex: /^(?:worker|src)\/durable-objects\/([^/]+)\//, skip: [] },
@@ -71,15 +106,16 @@ function getEntity(relPath) {
     { regex: /^src\/components\/([^/]+)\//, skip: ['ui', 'layout'] },
     { regex: /^src\/hooks\/([^/]+)\//, skip: ['shared'] },
     { regex: /^src\/types\/([^/]+)\//, skip: ['shared'] },
+    { regex: /^src\/([^/]+)\//, skip: ['cli', 'lib'] },
   ];
   for (const { regex, skip } of patterns) {
-    const match = relPath.match(regex);
+    const match = norm.match(regex);
     if (match) {
       const entity = match[1];
-      return skip.includes(entity) ? null : entity;
+      return skip.includes(entity) ? pkgName : entity;
     }
   }
-  return null;
+  return pkgName;
 }
 
 function getExports(filePath) {
