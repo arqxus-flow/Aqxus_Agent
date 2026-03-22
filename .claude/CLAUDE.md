@@ -88,21 +88,6 @@ Top arquivos por PageRank (hub central do codigo):
 - `packages/orbi/src/agent/agent.ts` (definicao de agentes)
 - `packages/orbi/src/tool/registry.ts` (registro de tools)
 
-## Contexto do negocio
-
-Orbi e um harness de agente para gestao empresarial:
-- Cada pessoa roda Orbi local no PC
-- Cloudflare faz parte assincrona (cron, tarefas, webhooks)
-- MCP servers na Cloudflare com OAuth via Access (padrao Tacito)
-- Sandbox sob demanda para interfaces visuais
-- Banco central (D1/Postgres) como fonte de verdade
-
-## MCPs do Arthur (referencia)
-
-- **Pipeline ERP** (pipelinegeterp.innutri.work) — Postgres com dados do ERP Maxiprod, 10 tools MCP
-- **Tacito** (Arqxus/Tacito) — Files, folders, tags, search com R2/D1
-- **Sandbox** (sandbox.innutri.work) — React sob demanda
-
 ## Bugs corrigidos
 
 - **Desktop markdown tables**: nativeParser desativado em Electron e Tauri. Usa jsParser (igual web). Commit 90dc0a8c8
