@@ -55,7 +55,7 @@ Hooks em `.claude/settings.local.json` injetam contexto do Cortex Graph API auto
 - **PreToolUse (Read/Edit/Write):** consulta imports e dependentes do arquivo sendo editado
 - **PostToolUse (Edit/Write):** sincroniza grafo após mudanças
 
-Grafo: 951 nodes, 3.047 edges (imports entre arquivos). Top arquivos por PageRank:
+Grafo atualizado após remoção do console. Top arquivos por PageRank:
 - `packages/orbi/src/project/instance.ts` (hub central, 111 conexões)
 - `packages/orbi/src/config/config.ts` (configuração)
 - `packages/orbi/src/session/prompt.ts` (loop principal do agente)
