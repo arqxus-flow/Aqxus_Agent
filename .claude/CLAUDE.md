@@ -19,7 +19,8 @@ Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel
 - `cd packages/orbi && bun test` — testes (nunca do root)
 - `bun install` — instalar dependencias
 - `cd knowledge && npm run seed -- /Users/arthuraquino/opencode` — reseed Cortex Graph
-- Release: GitHub Actions → publish → Run workflow → digitar versao
+- Release manual: GitHub Actions → publish → Run workflow → digitar versao
+- Release por tag: `git tag v0.0.3 && git push origin v0.0.3` (CI dispara automatico)
 - Web dev: `./packages/orbi/dist/orbi-darwin-arm64/bin/orbi web` + `cd packages/app && bun dev`
 
 ## Estrutura principal
