@@ -49,6 +49,20 @@ Testes: rodar de dentro dos packages, não do root.
 - Snake_case em schemas Drizzle
 - Sem mocks em testes
 
+## Cortex Graph (contexto automático)
+
+Hooks em `.claude/settings.local.json` injetam contexto do Cortex Graph API automaticamente:
+- **PreToolUse (Read/Edit/Write):** consulta imports e dependentes do arquivo sendo editado
+- **PostToolUse (Edit/Write):** sincroniza grafo após mudanças
+
+Grafo: 951 nodes, 3.047 edges (imports entre arquivos). Top arquivos por PageRank:
+- `packages/orbi/src/project/instance.ts` (hub central, 111 conexões)
+- `packages/orbi/src/config/config.ts` (configuração)
+- `packages/orbi/src/session/prompt.ts` (loop principal do agente)
+- `packages/orbi/src/agent/agent.ts` (definição de agentes)
+
+Reseed: `cd knowledge && npm run seed -- /Users/arthuraquino/opencode`
+
 ## Contexto do negócio
 
 Orbi é um harness de agente para gestão empresarial:
