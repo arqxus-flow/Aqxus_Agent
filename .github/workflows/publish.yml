@@ -271,13 +271,14 @@ jobs:
         env:
           ORBI_CHANNEL: prod
           GH_TOKEN: ${{ github.token }}
-          # Skip code signing when no certificate is configured
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.APPLE_CERTIFICATE != '' }}
-          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          # Disable code signing (no certificate configured yet)
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          # Add these back when Apple certificate is configured:
+          # CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
+          # CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8
+          # APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY }}
+          # APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
 
       - uses: actions/upload-artifact@v4
         with:
