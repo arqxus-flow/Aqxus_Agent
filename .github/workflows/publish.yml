@@ -203,106 +203,15 @@ jobs:
           # Apple signing — add when certificate is configured:
           # APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, etc.
 
-  # ─── 4. Build Desktop (Electron) ──────────────────────────────────
-  build-electron:
-    needs: [build-cli, version]
-    strategy:
-      fail-fast: false
-      matrix:
-        settings:
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            platform_flag: --mac --arm64
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            platform_flag: --mac --x64
-          - host: windows-latest
-            target: x86_64-pc-windows-msvc
-            platform_flag: --win
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            platform_flag: --linux
-    runs-on: ${{ matrix.settings.host }}
-    steps:
-      - uses: actions/checkout@v4
-
-      # Apple code signing (optional)
-      - name: Check Apple certificate
-        if: runner.os == 'macOS'
-        id: apple-cert
-        run: |
-          if [ -n "$CERT" ]; then echo "available=true" >> $GITHUB_OUTPUT; fi
-        env:
-          CERT: ${{ secrets.APPLE_CERTIFICATE }}
-
-      - uses: apple-actions/import-codesign-certs@v2
-        if: steps.apple-cert.outputs.available == 'true'
-        with:
-          keychain: build
-          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
-          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-
-      - name: Setup Apple API Key
-        if: steps.apple-cert.outputs.available == 'true'
-        run: echo "${{ secrets.APPLE_API_KEY_PATH }}" > $RUNNER_TEMP/apple-api-key.p8
-
-      - uses: ./.github/actions/setup-bun
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      # Linux dependencies
-      - name: Install dependencies (ubuntu)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends rpm
-
-      # Prepare sidecar
-      - name: Prepare
-        run: bun ./scripts/prepare.ts
-        working-directory: packages/desktop-electron
-        env:
-          ORBI_VERSION: ${{ needs.version.outputs.version }}
-          ORBI_CHANNEL: prod
-          RUST_TARGET: ${{ matrix.settings.target }}
-          GH_TOKEN: ${{ github.token }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-
-      # Build
-      - name: Build
-        run: bun run build
-        working-directory: packages/desktop-electron
-        env:
-          ORBI_CHANNEL: prod
-
-      # Package and upload to release
-      - name: Package and publish
-        if: needs.version.outputs.release
-        run: npx electron-builder ${{ matrix.settings.platform_flag }} --publish always --config electron-builder.config.ts
-        working-directory: packages/desktop-electron
-        timeout-minutes: 60
-        env:
-          ORBI_CHANNEL: prod
-          GH_TOKEN: ${{ github.token }}
-          # Disable code signing (no certificate configured yet)
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          # Add these back when Apple certificate is configured:
-          # CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
-          # CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          # APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8
-          # APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY }}
-          # APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: orbi-electron-${{ matrix.settings.target }}
-          path: packages/desktop-electron/dist/*
+  # ─── 4. Build Desktop (Electron) — DESABILITADO pra economizar minutos ───
+  # Reativar quando necessário: descomentar o job e adicionar build-electron ao finalize.needs
+  # build-electron:
+  #   needs: [build-cli, version]
+  #   ... (código preservado no git history, commit anterior)
 
   # ─── 5. Finalize — undraft the release ─────────────────────────────
   finalize:
-    needs: [version, build-cli, build-tauri, build-electron]
+    needs: [version, build-cli, build-tauri]
     runs-on: ubuntu-latest
     steps:
       - name: Publish release
