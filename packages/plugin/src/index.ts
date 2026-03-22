@@ -10,7 +10,7 @@ import type {
   Part,
   Auth,
   Config,
-} from "@opencode-ai/sdk"
+} from "@orbi/sdk"
 
 import type { BunShell } from "./shell.js"
 import { type ToolDefinition } from "./tool.js"

@@ -1,13 +1,13 @@
 import type { Configuration } from "electron-builder"
 
 const channel = (() => {
-  const raw = process.env.OPENCODE_CHANNEL
+  const raw = process.env.ORBI_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
 const getBase = (): Configuration => ({
-  artifactName: "opencode-electron-${os}-${arch}.${ext}",
+  artifactName: "orbi-electron-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -17,7 +17,7 @@ const getBase = (): Configuration => ({
     {
       from: "resources/",
       to: "",
-      filter: ["opencode-cli*"],
+      filter: ["orbi-cli*"],
     },
     {
       from: "native/",
@@ -39,8 +39,8 @@ const getBase = (): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
-    schemes: ["opencode"],
+    name: "Orbi",
+    schemes: ["orbi"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -66,29 +66,29 @@ function getConfig() {
     case "dev": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.dev",
-        productName: "OpenCode Dev",
-        rpm: { packageName: "opencode-dev" },
+        appId: "com.orbi.desktop.dev",
+        productName: "Orbi Dev",
+        rpm: { packageName: "orbi-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.beta",
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        appId: "com.orbi.desktop.beta",
+        productName: "Orbi Beta",
+        protocols: { name: "Orbi Beta", schemes: ["orbi"] },
+        publish: { provider: "github", owner: "anomalyco", repo: "orbi-beta", channel: "latest" },
+        rpm: { packageName: "orbi-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
-        appId: "ai.opencode.desktop",
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
-        rpm: { packageName: "opencode" },
+        appId: "com.orbi.desktop",
+        productName: "Orbi",
+        protocols: { name: "Orbi", schemes: ["orbi"] },
+        publish: { provider: "github", owner: "anomalyco", repo: "orbi", channel: "latest" },
+        rpm: { packageName: "orbi" },
       }
     }
   }

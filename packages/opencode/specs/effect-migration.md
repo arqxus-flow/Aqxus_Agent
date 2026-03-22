@@ -1,6 +1,6 @@
 # Effect patterns
 
-Practical reference for new and migrated Effect code in `packages/opencode`.
+Practical reference for new and migrated Effect code in `packages/orbi`.
 
 ## Choose scope
 
@@ -23,7 +23,7 @@ export namespace Foo {
     readonly get: (id: FooID) => Effect.Effect<FooInfo, FooError>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Foo") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/Foo") {}
 
   export const layer = Layer.effect(
     Service,
@@ -58,7 +58,7 @@ export namespace FooEffect {
     readonly get: (id: FooID) => Effect.Effect<Foo, FooError>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Foo") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/Foo") {}
 
   export const layer = Layer.effect(...)
 }

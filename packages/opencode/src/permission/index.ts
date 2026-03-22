@@ -130,7 +130,7 @@ export namespace PermissionNext {
     return evalRule(permission, pattern, ...rulesets)
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/PermissionNext") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/PermissionNext") {}
 
   export const layer = Layer.effect(
     Service,

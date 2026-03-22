@@ -33,7 +33,7 @@ export namespace Vcs {
     readonly branch: () => Effect.Effect<string | undefined>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Vcs") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/Vcs") {}
 
   export const layer = Layer.effect(
     Service,

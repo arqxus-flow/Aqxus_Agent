@@ -1,4 +1,4 @@
-import { base64Decode, base64Encode } from "@opencode-ai/util/encode"
+import { base64Decode, base64Encode } from "@orbi/util/encode"
 import { expect, type Locator, type Page } from "@playwright/test"
 import fs from "node:fs/promises"
 import os from "node:os"
@@ -53,7 +53,7 @@ export async function terminalConnects(page: Page, input?: { term?: Locator }) {
   const term = input?.term ?? page.locator(terminalSelector).first()
   const id = await terminalID(term)
   return page.evaluate((id) => {
-    return (window as E2EWindow).__opencode_e2e?.terminal?.terminals?.[id]?.connects ?? 0
+    return (window as E2EWindow).__orbi_e2e?.terminal?.terminals?.[id]?.connects ?? 0
   }, id)
 }
 
@@ -61,7 +61,7 @@ export async function disconnectTerminal(page: Page, input?: { term?: Locator })
   const term = input?.term ?? page.locator(terminalSelector).first()
   const id = await terminalID(term)
   await page.evaluate((id) => {
-    ;(window as E2EWindow).__opencode_e2e?.terminal?.controls?.[id]?.disconnect?.()
+    ;(window as E2EWindow).__orbi_e2e?.terminal?.controls?.[id]?.disconnect?.()
   }, id)
 }
 
@@ -69,7 +69,7 @@ async function terminalReady(page: Page, term?: Locator) {
   const next = term ?? page.locator(terminalSelector).first()
   const id = await terminalID(next)
   return page.evaluate((id) => {
-    const state = (window as E2EWindow).__opencode_e2e?.terminal?.terminals?.[id]
+    const state = (window as E2EWindow).__orbi_e2e?.terminal?.terminals?.[id]
     return !!state?.connected && (state.settled ?? 0) > 0
   }, id)
 }
@@ -78,7 +78,7 @@ async function terminalFocusIdle(page: Page, term?: Locator) {
   const next = term ?? page.locator(terminalSelector).first()
   const id = await terminalID(next)
   return page.evaluate((id) => {
-    const state = (window as E2EWindow).__opencode_e2e?.terminal?.terminals?.[id]
+    const state = (window as E2EWindow).__orbi_e2e?.terminal?.terminals?.[id]
     return (state?.focusing ?? 0) === 0
   }, id)
 }
@@ -88,7 +88,7 @@ async function terminalHas(page: Page, input: { term?: Locator; token: string })
   const id = await terminalID(next)
   return page.evaluate(
     (input) => {
-      const state = (window as E2EWindow).__opencode_e2e?.terminal?.terminals?.[input.id]
+      const state = (window as E2EWindow).__orbi_e2e?.terminal?.terminals?.[input.id]
       return state?.rendered.includes(input.token) ?? false
     },
     { id, token: input.token },
@@ -97,7 +97,7 @@ async function terminalHas(page: Page, input: { term?: Locator; token: string })
 
 async function promptSlashActive(page: Page, id: string) {
   return page.evaluate((id) => {
-    const state = (window as E2EWindow).__opencode_e2e?.prompt?.current
+    const state = (window as E2EWindow).__orbi_e2e?.prompt?.current
     if (state?.popover !== "slash") return false
     if (!state.slash.ids.includes(id)) return false
     return state.slash.active === id
@@ -106,13 +106,13 @@ async function promptSlashActive(page: Page, id: string) {
 
 async function promptSlashSelects(page: Page) {
   return page.evaluate(() => {
-    return (window as E2EWindow).__opencode_e2e?.prompt?.current?.selects ?? 0
+    return (window as E2EWindow).__orbi_e2e?.prompt?.current?.selects ?? 0
   })
 }
 
 async function promptSlashSelected(page: Page, input: { id: string; count: number }) {
   return page.evaluate((input) => {
-    const state = (window as E2EWindow).__opencode_e2e?.prompt?.current
+    const state = (window as E2EWindow).__orbi_e2e?.prompt?.current
     if (!state) return false
     return state.selected === input.id && state.selects >= input.count
   }, input)
@@ -315,7 +315,7 @@ export async function openSettings(page: Page) {
 export async function seedProjects(page: Page, input: { directory: string; extra?: string[] }) {
   await page.addInitScript(
     (args: { directory: string; serverUrl: string; extra: string[] }) => {
-      const key = "opencode.global.dat:server"
+      const key = "orbi.global.dat:server"
       const raw = localStorage.getItem(key)
       const parsed = (() => {
         if (!raw) return undefined
@@ -367,13 +367,13 @@ export async function seedProjects(page: Page, input: { directory: string; extra
 }
 
 export async function createTestProject() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-e2e-project-"))
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "orbi-e2e-project-"))
   const id = `e2e-${path.basename(root)}`
 
   await fs.writeFile(path.join(root, "README.md"), `# e2e\n\n${id}\n`)
 
   execSync("git init", { cwd: root, stdio: "ignore" })
-  await fs.writeFile(path.join(root, ".git", "opencode"), id)
+  await fs.writeFile(path.join(root, ".git", "orbi"), id)
   execSync("git config core.fsmonitor false", { cwd: root, stdio: "ignore" })
   execSync("git add -A", { cwd: root, stdio: "ignore" })
   execSync('git -c user.name="e2e" -c user.email="e2e@example.com" commit -m "init" --allow-empty', {
@@ -399,7 +399,7 @@ async function probeSession(page: Page) {
   return page
     .evaluate(() => {
       const win = window as E2EWindow
-      const current = win.__opencode_e2e?.model?.current
+      const current = win.__orbi_e2e?.model?.current
       if (!current) return null
       return { dir: current.dir, sessionID: current.sessionID }
     })

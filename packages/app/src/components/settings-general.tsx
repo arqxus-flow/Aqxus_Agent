@@ -1,12 +1,12 @@
 import { Component, Show, createMemo, createResource, type JSX } from "solid-js"
 import { createStore } from "solid-js/store"
-import { Button } from "@opencode-ai/ui/button"
-import { Icon } from "@opencode-ai/ui/icon"
-import { Select } from "@opencode-ai/ui/select"
-import { Switch } from "@opencode-ai/ui/switch"
-import { Tooltip } from "@opencode-ai/ui/tooltip"
-import { useTheme, type ColorScheme } from "@opencode-ai/ui/theme"
-import { showToast } from "@opencode-ai/ui/toast"
+import { Button } from "@orbi/ui/button"
+import { Icon } from "@orbi/ui/icon"
+import { Select } from "@orbi/ui/select"
+import { Switch } from "@orbi/ui/switch"
+import { Tooltip } from "@orbi/ui/tooltip"
+import { useTheme, type ColorScheme } from "@orbi/ui/theme"
+import { showToast } from "@orbi/ui/toast"
 import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
 import { useSettings, monoFontFamily } from "@/context/settings"
@@ -286,7 +286,7 @@ export const SettingsGeneral: Component = () => {
           description={
             <>
               {language.t("settings.general.row.theme.description")}{" "}
-              <Link href="https://opencode.ai/docs/themes/">{language.t("common.learnMore")}</Link>
+              <Link href="https://orbicowork.arqxus.com/docs/themes/">{language.t("common.learnMore")}</Link>
             </>
           }
         >

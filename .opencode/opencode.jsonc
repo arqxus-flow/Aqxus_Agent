@@ -1,13 +1,13 @@
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://orbicowork.arqxus.com/config.json",
   "provider": {
-    "opencode": {
+    "orbi": {
       "options": {},
     },
   },
   "permission": {
     "edit": {
-      "packages/opencode/migration/*": "deny",
+      "packages/orbi/migration/*": "deny",
     },
   },
   "mcp": {},

@@ -20973,13 +20973,13 @@
       }
     }
   },
-  "opencode": {
-    "id": "opencode",
-    "env": ["OPENCODE_API_KEY"],
+  "orbi": {
+    "id": "orbi",
+    "env": ["ORBI_API_KEY"],
     "npm": "@ai-sdk/openai-compatible",
-    "api": "https://opencode.ai/zen/v1",
-    "name": "OpenCode Zen",
-    "doc": "https://opencode.ai/docs/zen",
+    "api": "https://orbicowork.arqxus.com/zen/v1",
+    "name": "Orbi Zen",
+    "doc": "https://orbicowork.arqxus.com/docs/zen",
     "models": {
       "glm-4.7": {
         "id": "glm-4.7",

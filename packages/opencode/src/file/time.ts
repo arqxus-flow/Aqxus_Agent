@@ -42,12 +42,12 @@ export namespace FileTime {
     readonly withLock: <T>(filepath: string, fn: () => Promise<T>) => Effect.Effect<T>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/FileTime") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/FileTime") {}
 
   export const layer = Layer.effect(
     Service,
     Effect.gen(function* () {
-      const disableCheck = yield* Flag.OPENCODE_DISABLE_FILETIME_CHECK
+      const disableCheck = yield* Flag.ORBI_DISABLE_FILETIME_CHECK
       const reads = new Map<SessionID, Map<string, Stamp>>()
       const locks = new Map<string, Semaphore.Semaphore>()
 

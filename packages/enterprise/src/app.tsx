@@ -1,16 +1,16 @@
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
-import { Font } from "@opencode-ai/ui/font"
+import { Font } from "@orbi/ui/font"
 import { MetaProvider } from "@solidjs/meta"
-import { MarkedProvider } from "@opencode-ai/ui/context/marked"
-import { DialogProvider } from "@opencode-ai/ui/context/dialog"
-import { I18nProvider, type UiI18nParams } from "@opencode-ai/ui/context"
-import { dict as uiEn } from "@opencode-ai/ui/i18n/en"
-import { dict as uiZh } from "@opencode-ai/ui/i18n/zh"
+import { MarkedProvider } from "@orbi/ui/context/marked"
+import { DialogProvider } from "@orbi/ui/context/dialog"
+import { I18nProvider, type UiI18nParams } from "@orbi/ui/context"
+import { dict as uiEn } from "@orbi/ui/i18n/en"
+import { dict as uiZh } from "@orbi/ui/i18n/zh"
 import { createEffect, createMemo, Suspense, type ParentProps } from "solid-js"
 import { getRequestEvent } from "solid-js/web"
 import "./app.css"
-import { Favicon } from "@opencode-ai/ui/favicon"
+import { Favicon } from "@orbi/ui/favicon"
 
 function resolveTemplate(text: string, params?: UiI18nParams) {
   if (!params) return text

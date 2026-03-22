@@ -50,7 +50,7 @@ function lookup(_key: string) {
 }
 
 export class Instances extends ServiceMap.Service<Instances, LayerMap.LayerMap<string, InstanceServices>>()(
-  "opencode/Instances",
+  "orbi/Instances",
 ) {
   static readonly layer = Layer.effect(
     Instances,

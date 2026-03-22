@@ -1,5 +1,5 @@
-import type { AuthOuathResult } from "@opencode-ai/plugin"
-import { NamedError } from "@opencode-ai/util/error"
+import type { AuthOuathResult } from "@orbi/plugin"
+import { NamedError } from "@orbi/util/error"
 import * as Auth from "@/auth/effect"
 import { runPromiseInstance } from "@/effect/runtime"
 import { fn } from "@/util/fn"
@@ -101,7 +101,7 @@ export namespace ProviderAuth {
     readonly callback: (input: { providerID: ProviderID; method: number; code?: string }) => Effect.Effect<void, Error>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/ProviderAuth") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/ProviderAuth") {}
 
   export const layer = Layer.effect(
     Service,

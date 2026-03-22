@@ -9,7 +9,7 @@ import { mergeDeep, pipe, unique } from "remeda"
 import { Global } from "../global"
 import fs from "fs/promises"
 import { lazy } from "../util/lazy"
-import { NamedError } from "@opencode-ai/util/error"
+import { NamedError } from "@orbi/util/error"
 import { Flag } from "../flag/flag"
 import { Auth } from "../auth"
 import { Env } from "../env"
@@ -49,16 +49,16 @@ export namespace Config {
   function systemManagedConfigDir(): string {
     switch (process.platform) {
       case "darwin":
-        return "/Library/Application Support/opencode"
+        return "/Library/Application Support/orbi"
       case "win32":
-        return path.join(process.env.ProgramData || "C:\\ProgramData", "opencode")
+        return path.join(process.env.ProgramData || "C:\\ProgramData", "orbi")
       default:
-        return "/etc/opencode"
+        return "/etc/orbi"
     }
   }
 
   export function managedConfigDir() {
-    return process.env.OPENCODE_TEST_MANAGED_CONFIG_DIR || systemManagedConfigDir()
+    return process.env.ORBI_TEST_MANAGED_CONFIG_DIR || systemManagedConfigDir()
   }
 
   const managedDir = managedConfigDir()
@@ -78,33 +78,33 @@ export namespace Config {
   export const state = Instance.state(async () => {
     const auth = await Auth.all()
 
-    // Config loading order (low -> high precedence): https://opencode.ai/docs/config#precedence-order
-    // 1) Remote .well-known/opencode (org defaults)
-    // 2) Global config (~/.config/opencode/opencode.json{,c})
-    // 3) Custom config (OPENCODE_CONFIG)
-    // 4) Project config (opencode.json{,c})
-    // 5) .opencode directories (.opencode/agents/, .opencode/commands/, .opencode/plugins/, .opencode/opencode.json{,c})
-    // 6) Inline config (OPENCODE_CONFIG_CONTENT)
+    // Config loading order (low -> high precedence): https://orbicowork.arqxus.com/docs/config#precedence-order
+    // 1) Remote .well-known/orbi (org defaults)
+    // 2) Global config (~/.config/orbi/orbi.json{,c})
+    // 3) Custom config (ORBI_CONFIG)
+    // 4) Project config (orbi.json{,c})
+    // 5) .orbi directories (.orbi/agents/, .orbi/commands/, .orbi/plugins/, .orbi/orbi.json{,c})
+    // 6) Inline config (ORBI_CONFIG_CONTENT)
     // Managed config directory is enterprise-only and always overrides everything above.
     let result: Info = {}
     for (const [key, value] of Object.entries(auth)) {
       if (value.type === "wellknown") {
         const url = key.replace(/\/+$/, "")
         process.env[value.key] = value.token
-        log.debug("fetching remote config", { url: `${url}/.well-known/opencode` })
-        const response = await fetch(`${url}/.well-known/opencode`)
+        log.debug("fetching remote config", { url: `${url}/.well-known/orbi` })
+        const response = await fetch(`${url}/.well-known/orbi`)
         if (!response.ok) {
           throw new Error(`failed to fetch remote config from ${url}: ${response.status}`)
         }
         const wellknown = (await response.json()) as any
         const remoteConfig = wellknown.config ?? {}
         // Add $schema to prevent load() from trying to write back to a non-existent file
-        if (!remoteConfig.$schema) remoteConfig.$schema = "https://opencode.ai/config.json"
+        if (!remoteConfig.$schema) remoteConfig.$schema = "https://orbicowork.arqxus.com/config.json"
         result = mergeConfigConcatArrays(
           result,
           await load(JSON.stringify(remoteConfig), {
-            dir: path.dirname(`${url}/.well-known/opencode`),
-            source: `${url}/.well-known/opencode`,
+            dir: path.dirname(`${url}/.well-known/orbi`),
+            source: `${url}/.well-known/orbi`,
           }),
         )
         log.debug("loaded remote config from well-known", { url })
@@ -115,14 +115,14 @@ export namespace Config {
     result = mergeConfigConcatArrays(result, await global())
 
     // Custom config path overrides global config.
-    if (Flag.OPENCODE_CONFIG) {
-      result = mergeConfigConcatArrays(result, await loadFile(Flag.OPENCODE_CONFIG))
-      log.debug("loaded custom config", { path: Flag.OPENCODE_CONFIG })
+    if (Flag.ORBI_CONFIG) {
+      result = mergeConfigConcatArrays(result, await loadFile(Flag.ORBI_CONFIG))
+      log.debug("loaded custom config", { path: Flag.ORBI_CONFIG })
     }
 
     // Project config overrides global and remote config.
-    if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
-      for (const file of await ConfigPaths.projectFiles("opencode", Instance.directory, Instance.worktree)) {
+    if (!Flag.ORBI_DISABLE_PROJECT_CONFIG) {
+      for (const file of await ConfigPaths.projectFiles("orbi", Instance.directory, Instance.worktree)) {
         result = mergeConfigConcatArrays(result, await loadFile(file))
       }
     }
@@ -133,16 +133,16 @@ export namespace Config {
 
     const directories = await ConfigPaths.directories(Instance.directory, Instance.worktree)
 
-    // .opencode directory config overrides (project and global) config sources.
-    if (Flag.OPENCODE_CONFIG_DIR) {
-      log.debug("loading config from OPENCODE_CONFIG_DIR", { path: Flag.OPENCODE_CONFIG_DIR })
+    // .orbi directory config overrides (project and global) config sources.
+    if (Flag.ORBI_CONFIG_DIR) {
+      log.debug("loading config from ORBI_CONFIG_DIR", { path: Flag.ORBI_CONFIG_DIR })
     }
 
     const deps = []
 
     for (const dir of unique(directories)) {
-      if (dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR) {
-        for (const file of ["opencode.jsonc", "opencode.json"]) {
+      if (dir.endsWith(".orbi") || dir === Flag.ORBI_CONFIG_DIR) {
+        for (const file of ["orbi.jsonc", "orbi.json"]) {
           log.debug(`loading config from ${path.join(dir, file)}`)
           result = mergeConfigConcatArrays(result, await loadFile(path.join(dir, file)))
           // to satisfy the type checker
@@ -166,15 +166,15 @@ export namespace Config {
     }
 
     // Inline config content overrides all non-managed config sources.
-    if (process.env.OPENCODE_CONFIG_CONTENT) {
+    if (process.env.ORBI_CONFIG_CONTENT) {
       result = mergeConfigConcatArrays(
         result,
-        await load(process.env.OPENCODE_CONFIG_CONTENT, {
+        await load(process.env.ORBI_CONFIG_CONTENT, {
           dir: Instance.directory,
-          source: "OPENCODE_CONFIG_CONTENT",
+          source: "ORBI_CONFIG_CONTENT",
         }),
       )
-      log.debug("loaded custom config from OPENCODE_CONFIG_CONTENT")
+      log.debug("loaded custom config from ORBI_CONFIG_CONTENT")
     }
 
     const active = Account.active()
@@ -185,8 +185,8 @@ export namespace Config {
           Account.token(active.id),
         ])
         if (token) {
-          process.env["OPENCODE_CONSOLE_TOKEN"] = token
-          Env.set("OPENCODE_CONSOLE_TOKEN", token)
+          process.env["ORBI_CONSOLE_TOKEN"] = token
+          Env.set("ORBI_CONSOLE_TOKEN", token)
         }
 
         if (config) {
@@ -208,7 +208,7 @@ export namespace Config {
     // which would fail on system directories requiring elevated permissions
     // This way it only loads config file and not skills/plugins/commands
     if (existsSync(managedDir)) {
-      for (const file of ["opencode.jsonc", "opencode.json"]) {
+      for (const file of ["orbi.jsonc", "orbi.json"]) {
         result = mergeConfigConcatArrays(result, await loadFile(path.join(managedDir, file)))
       }
     }
@@ -223,8 +223,8 @@ export namespace Config {
       })
     }
 
-    if (Flag.OPENCODE_PERMISSION) {
-      result.permission = mergeDeep(result.permission ?? {}, JSON.parse(Flag.OPENCODE_PERMISSION))
+    if (Flag.ORBI_PERMISSION) {
+      result.permission = mergeDeep(result.permission ?? {}, JSON.parse(Flag.ORBI_PERMISSION))
     }
 
     // Backwards compatibility: legacy top-level `tools` config
@@ -249,10 +249,10 @@ export namespace Config {
     }
 
     // Apply flag overrides for compaction settings
-    if (Flag.OPENCODE_DISABLE_AUTOCOMPACT) {
+    if (Flag.ORBI_DISABLE_AUTOCOMPACT) {
       result.compaction = { ...result.compaction, auto: false }
     }
-    if (Flag.OPENCODE_DISABLE_PRUNE) {
+    if (Flag.ORBI_DISABLE_PRUNE) {
       result.compaction = { ...result.compaction, prune: false }
     }
 
@@ -279,7 +279,7 @@ export namespace Config {
     }))
     json.dependencies = {
       ...json.dependencies,
-      "@opencode-ai/plugin": targetVersion,
+      "@orbi/plugin": targetVersion,
     }
     await Filesystem.writeJson(pkg, json)
 
@@ -307,7 +307,7 @@ export namespace Config {
           stdout: err.stdout.toString(),
           stderr: err.stderr.toString(),
         }
-        if (Flag.OPENCODE_STRICT_CONFIG_DEPS) {
+        if (Flag.ORBI_STRICT_CONFIG_DEPS) {
           log.error("failed to install dependencies", detail)
           throw err
         }
@@ -315,7 +315,7 @@ export namespace Config {
         return
       }
 
-      if (Flag.OPENCODE_STRICT_CONFIG_DEPS) {
+      if (Flag.ORBI_STRICT_CONFIG_DEPS) {
         log.error("failed to install dependencies", { dir, error: err })
         throw err
       }
@@ -350,15 +350,15 @@ export namespace Config {
 
     const parsed = await Filesystem.readJson<{ dependencies?: Record<string, string> }>(pkg).catch(() => null)
     const dependencies = parsed?.dependencies ?? {}
-    const depVersion = dependencies["@opencode-ai/plugin"]
+    const depVersion = dependencies["@orbi/plugin"]
     if (!depVersion) return true
 
     const targetVersion = Installation.isLocal() ? "latest" : Installation.VERSION
     if (targetVersion === "latest") {
-      const isOutdated = await PackageRegistry.isOutdated("@opencode-ai/plugin", depVersion, dir)
+      const isOutdated = await PackageRegistry.isOutdated("@orbi/plugin", depVersion, dir)
       if (!isOutdated) return false
       log.info("Cached version is outdated, proceeding with install", {
-        pkg: "@opencode-ai/plugin",
+        pkg: "@orbi/plugin",
         cachedVersion: depVersion,
       })
       return true
@@ -400,7 +400,7 @@ export namespace Config {
       })
       if (!md) continue
 
-      const patterns = ["/.opencode/command/", "/.opencode/commands/", "/command/", "/commands/"]
+      const patterns = ["/.orbi/command/", "/.orbi/commands/", "/command/", "/commands/"]
       const file = rel(item, patterns) ?? path.basename(item)
       const name = trim(file)
 
@@ -439,7 +439,7 @@ export namespace Config {
       })
       if (!md) continue
 
-      const patterns = ["/.opencode/agent/", "/.opencode/agents/", "/agent/", "/agents/"]
+      const patterns = ["/.orbi/agent/", "/.orbi/agents/", "/agent/", "/agents/"]
       const file = rel(item, patterns) ?? path.basename(item)
       const agentName = trim(file)
 
@@ -515,7 +515,7 @@ export namespace Config {
    *
    * @example
    * getPluginName("file:///path/to/plugin/foo.js") // "foo"
-   * getPluginName("oh-my-opencode@2.4.3") // "oh-my-opencode"
+   * getPluginName("oh-my-orbi@2.4.3") // "oh-my-orbi"
    * getPluginName("@scope/pkg@1.0.0") // "@scope/pkg"
    */
   export function getPluginName(plugin: string): string {
@@ -533,20 +533,20 @@ export namespace Config {
    * Deduplicates plugins by name, with later entries (higher priority) winning.
    * Priority order (highest to lowest):
    * 1. Local plugin/ directory
-   * 2. Local opencode.json
+   * 2. Local orbi.json
    * 3. Global plugin/ directory
-   * 4. Global opencode.json
+   * 4. Global orbi.json
    *
    * Since plugins are added in low-to-high priority order,
    * we reverse, deduplicate (keeping first occurrence), then restore order.
    */
   export function deduplicatePlugins(plugins: string[]): string[] {
     // seenNames: canonical plugin names for duplicate detection
-    // e.g., "oh-my-opencode", "@scope/pkg"
+    // e.g., "oh-my-orbi", "@scope/pkg"
     const seenNames = new Set<string>()
 
     // uniqueSpecifiers: full plugin specifiers to return
-    // e.g., "oh-my-opencode@2.4.3", "file:///path/to/plugin.js"
+    // e.g., "oh-my-orbi@2.4.3", "file:///path/to/plugin.js"
     const uniqueSpecifiers: string[] = []
 
     for (const specifier of plugins.toReversed()) {
@@ -962,7 +962,7 @@ export namespace Config {
       port: z.number().int().positive().optional().describe("Port to listen on"),
       hostname: z.string().optional().describe("Hostname to listen on"),
       mdns: z.boolean().optional().describe("Enable mDNS service discovery"),
-      mdnsDomain: z.string().optional().describe("Custom domain name for mDNS service (default: opencode.local)"),
+      mdnsDomain: z.string().optional().describe("Custom domain name for mDNS service (default: orbi.local)"),
       cors: z.array(z.string()).optional().describe("Additional domains to allow for CORS"),
     })
     .strict()
@@ -1040,11 +1040,11 @@ export namespace Config {
     .object({
       $schema: z.string().optional().describe("JSON schema reference for configuration validation"),
       logLevel: Log.Level.optional().describe("Log level"),
-      server: Server.optional().describe("Server configuration for opencode serve and web commands"),
+      server: Server.optional().describe("Server configuration for orbi serve and web commands"),
       command: z
         .record(z.string(), Command)
         .optional()
-        .describe("Command configuration, see https://opencode.ai/docs/commands"),
+        .describe("Command configuration, see https://orbicowork.arqxus.com/docs/commands"),
       skills: Skills.optional().describe("Additional skill folder paths"),
       watcher: z
         .object({
@@ -1116,7 +1116,7 @@ export namespace Config {
         })
         .catchall(Agent)
         .optional()
-        .describe("Agent configuration, see https://opencode.ai/docs/agents"),
+        .describe("Agent configuration, see https://orbicowork.arqxus.com/docs/agents"),
       provider: z
         .record(z.string(), Provider)
         .optional()
@@ -1239,8 +1239,8 @@ export namespace Config {
     let result: Info = pipe(
       {},
       mergeDeep(await loadFile(path.join(Global.Path.config, "config.json"))),
-      mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.json"))),
-      mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.jsonc"))),
+      mergeDeep(await loadFile(path.join(Global.Path.config, "orbi.json"))),
+      mergeDeep(await loadFile(path.join(Global.Path.config, "orbi.jsonc"))),
     )
 
     const legacy = path.join(Global.Path.config, "config")
@@ -1253,7 +1253,7 @@ export namespace Config {
         .then(async (mod) => {
           const { provider, model, ...rest } = mod.default
           if (provider && model) result.model = `${provider}/${model}`
-          result["$schema"] = "https://opencode.ai/config.json"
+          result["$schema"] = "https://orbicowork.arqxus.com/config.json"
           result = mergeDeep(result, rest)
           await Filesystem.writeJson(path.join(Global.Path.config, "config.json"), result)
           await fs.unlink(legacy)
@@ -1290,15 +1290,15 @@ export namespace Config {
       delete copy.theme
       delete copy.keybinds
       delete copy.tui
-      log.warn("tui keys in opencode config are deprecated; move them to tui.json", { path: source })
+      log.warn("tui keys in orbi config are deprecated; move them to tui.json", { path: source })
       return copy
     })()
 
     const parsed = Info.safeParse(normalized)
     if (parsed.success) {
       if (!parsed.data.$schema && isFile) {
-        parsed.data.$schema = "https://opencode.ai/config.json"
-        const updated = original.replace(/^\s*\{/, '{\n  "$schema": "https://opencode.ai/config.json",')
+        parsed.data.$schema = "https://orbicowork.arqxus.com/config.json"
+        const updated = original.replace(/^\s*\{/, '{\n  "$schema": "https://orbicowork.arqxus.com/config.json",')
         await Filesystem.write(options.path, updated).catch(() => {})
       }
       const data = parsed.data
@@ -1354,7 +1354,7 @@ export namespace Config {
   }
 
   function globalConfigFile() {
-    const candidates = ["opencode.jsonc", "opencode.json", "config.json"].map((file) =>
+    const candidates = ["orbi.jsonc", "orbi.json", "config.json"].map((file) =>
       path.join(Global.Path.config, file),
     )
     for (const file of candidates) {

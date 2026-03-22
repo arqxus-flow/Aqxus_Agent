@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# Orbi Desktop
 
-Native OpenCode desktop app, built with Tauri v2.
+Native Orbi desktop app, built with Tauri v2.
 
 ## Development
 

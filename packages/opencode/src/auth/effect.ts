@@ -3,7 +3,7 @@ import { Effect, Layer, Record, Result, Schema, ServiceMap } from "effect"
 import { Global } from "../global"
 import { Filesystem } from "../util/filesystem"
 
-export const OAUTH_DUMMY_KEY = "opencode-oauth-dummy-key"
+export const OAUTH_DUMMY_KEY = "orbi-oauth-dummy-key"
 
 export class Oauth extends Schema.Class<Oauth>("OAuth")({
   type: Schema.Literal("oauth"),
@@ -45,7 +45,7 @@ export namespace AuthEffect {
     readonly remove: (key: string) => Effect.Effect<void, AuthError>
   }
 
-  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Auth") {}
+  export class Service extends ServiceMap.Service<Service, Interface>()("@orbi/Auth") {}
 
   export const layer = Layer.effect(
     Service,

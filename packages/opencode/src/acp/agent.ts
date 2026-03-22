@@ -43,7 +43,7 @@ import { Config } from "@/config/config"
 import { Todo } from "@/session/todo"
 import { z } from "zod"
 import { LoadAPIKeyError } from "ai"
-import type { AssistantMessage, Event, OpencodeClient, SessionMessageResponse, ToolPart } from "@opencode-ai/sdk/v2"
+import type { AssistantMessage, Event, OpencodeClient, SessionMessageResponse, ToolPart } from "@orbi/sdk/v2"
 import { applyPatch } from "diff"
 
 type ModeOption = { id: string; name: string; description?: string }
@@ -521,18 +521,18 @@ export namespace ACP {
       log.info("initialize", { protocolVersion: params.protocolVersion })
 
       const authMethod: AuthMethod = {
-        description: "Run `opencode auth login` in the terminal",
-        name: "Login with opencode",
-        id: "opencode-login",
+        description: "Run `orbi auth login` in the terminal",
+        name: "Login with orbi",
+        id: "orbi-login",
       }
 
       // If client supports terminal-auth capability, use that instead.
       if (params.clientCapabilities?._meta?.["terminal-auth"] === true) {
         authMethod._meta = {
           "terminal-auth": {
-            command: "opencode",
+            command: "orbi",
             args: ["auth", "login"],
-            label: "OpenCode Login",
+            label: "Orbi Login",
           },
         }
       }
@@ -557,7 +557,7 @@ export namespace ACP {
         },
         authMethods: [authMethod],
         agentInfo: {
-          name: "OpenCode",
+          name: "Orbi",
           version: Installation.VERSION,
         },
       }
@@ -983,7 +983,7 @@ export namespace ACP {
           }
         } else if (part.type === "file") {
           // Replay file attachments as appropriate ACP content blocks.
-          // OpenCode stores files internally as { type: "file", url, filename, mime }.
+          // Orbi stores files internally as { type: "file", url, filename, mime }.
           // We convert these back to ACP blocks based on the URL scheme and MIME type:
           // - file:// URLs → resource_link
           // - data: URLs with image/* → image block
@@ -1561,12 +1561,12 @@ export namespace ACP {
 
     if (specified && !providers.length) return specified
 
-    const opencodeProvider = providers.find((p) => p.id === "opencode")
-    if (opencodeProvider) {
-      if (opencodeProvider.models["big-pickle"]) {
-        return { providerID: ProviderID.opencode, modelID: ModelID.make("big-pickle") }
+    const orbiProvider = providers.find((p) => p.id === "orbi")
+    if (orbiProvider) {
+      if (orbiProvider.models["big-pickle"]) {
+        return { providerID: ProviderID.orbi, modelID: ModelID.make("big-pickle") }
       }
-      const [best] = Provider.sort(Object.values(opencodeProvider.models))
+      const [best] = Provider.sort(Object.values(orbiProvider.models))
       if (best) {
         return {
           providerID: ProviderID.make(best.providerID),
@@ -1586,7 +1586,7 @@ export namespace ACP {
 
     if (specified) return specified
 
-    return { providerID: ProviderID.opencode, modelID: ModelID.make("big-pickle") }
+    return { providerID: ProviderID.orbi, modelID: ModelID.make("big-pickle") }
   }
 
   function parseUri(
@@ -1701,7 +1701,7 @@ export namespace ACP {
     availableVariants: string[]
   }) {
     return {
-      opencode: {
+      orbi: {
         modelId: `${input.model.providerID}/${input.model.modelID}`,
         variant: input.variant ?? null,
         availableVariants: input.availableVariants,

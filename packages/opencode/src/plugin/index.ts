@@ -1,17 +1,17 @@
-import type { Hooks, PluginInput, Plugin as PluginInstance } from "@opencode-ai/plugin"
+import type { Hooks, PluginInput, Plugin as PluginInstance } from "@orbi/plugin"
 import { Config } from "../config/config"
 import { Bus } from "../bus"
 import { Log } from "../util/log"
-import { createOpencodeClient } from "@opencode-ai/sdk"
+import { createOpencodeClient } from "@orbi/sdk"
 import { Server } from "../server/server"
 import { BunProc } from "../bun"
 import { Instance } from "../project/instance"
 import { Flag } from "../flag/flag"
 import { CodexAuthPlugin } from "./codex"
 import { Session } from "../session"
-import { NamedError } from "@opencode-ai/util/error"
+import { NamedError } from "@orbi/util/error"
 import { CopilotAuthPlugin } from "./copilot"
-import { gitlabAuthPlugin as GitlabAuthPlugin } from "@gitlab/opencode-gitlab-auth"
+import { gitlabAuthPlugin as GitlabAuthPlugin } from "@gitlab/orbi-gitlab-auth"
 
 export namespace Plugin {
   const log = Log.create({ service: "plugin" })
@@ -23,9 +23,9 @@ export namespace Plugin {
     const client = createOpencodeClient({
       baseUrl: "http://localhost:4096",
       directory: Instance.directory,
-      headers: Flag.OPENCODE_SERVER_PASSWORD
+      headers: Flag.ORBI_SERVER_PASSWORD
         ? {
-            Authorization: `Basic ${Buffer.from(`${Flag.OPENCODE_SERVER_USERNAME ?? "opencode"}:${Flag.OPENCODE_SERVER_PASSWORD}`).toString("base64")}`,
+            Authorization: `Basic ${Buffer.from(`${Flag.ORBI_SERVER_USERNAME ?? "orbi"}:${Flag.ORBI_SERVER_PASSWORD}`).toString("base64")}`,
           }
         : undefined,
       fetch: async (...args) => Server.Default().fetch(...args),
@@ -56,7 +56,7 @@ export namespace Plugin {
 
     for (let plugin of plugins) {
       // ignore old codex plugin since it is supported first party now
-      if (plugin.includes("opencode-openai-codex-auth") || plugin.includes("opencode-copilot-auth")) continue
+      if (plugin.includes("orbi-openai-codex-auth") || plugin.includes("orbi-copilot-auth")) continue
       log.info("loading plugin", { path: plugin })
       if (!plugin.startsWith("file://")) {
         const lastAtIndex = plugin.lastIndexOf("@")

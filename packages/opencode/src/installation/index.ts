@@ -1,7 +1,7 @@
 import { BusEvent } from "@/bus/bus-event"
 import path from "path"
 import z from "zod"
-import { NamedError } from "@opencode-ai/util/error"
+import { NamedError } from "@orbi/util/error"
 import { Log } from "../util/log"
 import { iife } from "@/util/iife"
 import { Flag } from "../flag/flag"
@@ -9,8 +9,8 @@ import { Process } from "@/util/process"
 import { buffer } from "node:stream/consumers"
 
 declare global {
-  const OPENCODE_VERSION: string
-  const OPENCODE_CHANNEL: string
+  const ORBI_VERSION: string
+  const ORBI_CHANNEL: string
 }
 
 export namespace Installation {
@@ -25,7 +25,7 @@ export namespace Installation {
   }
 
   async function upgradeCurl(target: string) {
-    const body = await fetch("https://opencode.ai/install").then((res) => {
+    const body = await fetch("https://orbicowork.arqxus.com/install").then((res) => {
       if (!res.ok) throw new Error(res.statusText)
       return res.text()
     })
@@ -91,7 +91,7 @@ export namespace Installation {
   }
 
   export async function method() {
-    if (process.execPath.includes(path.join(".opencode", "bin"))) return "curl"
+    if (process.execPath.includes(path.join(".orbi", "bin"))) return "curl"
     if (process.execPath.includes(path.join(".local", "bin"))) return "curl"
     const exec = process.execPath.toLowerCase()
 
@@ -114,15 +114,15 @@ export namespace Installation {
       },
       {
         name: "brew" as const,
-        command: () => text(["brew", "list", "--formula", "opencode"]),
+        command: () => text(["brew", "list", "--formula", "orbi"]),
       },
       {
         name: "scoop" as const,
-        command: () => text(["scoop", "list", "opencode"]),
+        command: () => text(["scoop", "list", "orbi"]),
       },
       {
         name: "choco" as const,
-        command: () => text(["choco", "list", "--limit-output", "opencode"]),
+        command: () => text(["choco", "list", "--limit-output", "orbi"]),
       },
     ]
 
@@ -137,7 +137,7 @@ export namespace Installation {
     for (const check of checks) {
       const output = await check.command()
       const installedName =
-        check.name === "brew" || check.name === "choco" || check.name === "scoop" ? "opencode" : "opencode-ai"
+        check.name === "brew" || check.name === "choco" || check.name === "scoop" ? "orbi" : "orbi"
       if (output.includes(installedName)) {
         return check.name
       }
@@ -154,11 +154,11 @@ export namespace Installation {
   )
 
   async function getBrewFormula() {
-    const tapFormula = await text(["brew", "list", "--formula", "anomalyco/tap/opencode"])
-    if (tapFormula.includes("opencode")) return "anomalyco/tap/opencode"
-    const coreFormula = await text(["brew", "list", "--formula", "opencode"])
-    if (coreFormula.includes("opencode")) return "opencode"
-    return "opencode"
+    const tapFormula = await text(["brew", "list", "--formula", "anomalyco/tap/orbi"])
+    if (tapFormula.includes("orbi")) return "anomalyco/tap/orbi"
+    const coreFormula = await text(["brew", "list", "--formula", "orbi"])
+    if (coreFormula.includes("orbi")) return "orbi"
+    return "orbi"
   }
 
   export async function upgrade(method: Method, target: string) {
@@ -168,13 +168,13 @@ export namespace Installation {
         result = await upgradeCurl(target)
         break
       case "npm":
-        result = await Process.run(["npm", "install", "-g", `opencode-ai@${target}`], { nothrow: true })
+        result = await Process.run(["npm", "install", "-g", `orbi@${target}`], { nothrow: true })
         break
       case "pnpm":
-        result = await Process.run(["pnpm", "install", "-g", `opencode-ai@${target}`], { nothrow: true })
+        result = await Process.run(["pnpm", "install", "-g", `orbi@${target}`], { nothrow: true })
         break
       case "bun":
-        result = await Process.run(["bun", "install", "-g", `opencode-ai@${target}`], { nothrow: true })
+        result = await Process.run(["bun", "install", "-g", `orbi@${target}`], { nothrow: true })
         break
       case "brew": {
         const formula = await getBrewFormula()
@@ -207,10 +207,10 @@ export namespace Installation {
       }
 
       case "choco":
-        result = await Process.run(["choco", "upgrade", "opencode", `--version=${target}`, "-y"], { nothrow: true })
+        result = await Process.run(["choco", "upgrade", "orbi", `--version=${target}`, "-y"], { nothrow: true })
         break
       case "scoop":
-        result = await Process.run(["scoop", "install", `opencode@${target}`], { nothrow: true })
+        result = await Process.run(["scoop", "install", `orbi@${target}`], { nothrow: true })
         break
       default:
         throw new Error(`Unknown method: ${method}`)
@@ -231,9 +231,9 @@ export namespace Installation {
     await Process.text([process.execPath, "--version"], { nothrow: true })
   }
 
-  export const VERSION = typeof OPENCODE_VERSION === "string" ? OPENCODE_VERSION : "local"
-  export const CHANNEL = typeof OPENCODE_CHANNEL === "string" ? OPENCODE_CHANNEL : "local"
-  export const USER_AGENT = `opencode/${CHANNEL}/${VERSION}/${Flag.OPENCODE_CLIENT}`
+  export const VERSION = typeof ORBI_VERSION === "string" ? ORBI_VERSION : "local"
+  export const CHANNEL = typeof ORBI_CHANNEL === "string" ? ORBI_CHANNEL : "local"
+  export const USER_AGENT = `orbi/${CHANNEL}/${VERSION}/${Flag.ORBI_CLIENT}`
 
   export async function latest(installMethod?: Method) {
     const detectedMethod = installMethod || (await method())
@@ -247,7 +247,7 @@ export namespace Installation {
         if (!version) throw new Error(`Could not detect version for tap formula: ${formula}`)
         return version
       }
-      return fetch("https://formulae.brew.sh/api/formula/opencode.json")
+      return fetch("https://formulae.brew.sh/api/formula/orbi.json")
         .then((res) => {
           if (!res.ok) throw new Error(res.statusText)
           return res.json()
@@ -262,7 +262,7 @@ export namespace Installation {
         return reg.endsWith("/") ? reg.slice(0, -1) : reg
       })
       const channel = CHANNEL
-      return fetch(`${registry}/opencode-ai/${channel}`)
+      return fetch(`${registry}/orbi/${channel}`)
         .then((res) => {
           if (!res.ok) throw new Error(res.statusText)
           return res.json()
@@ -272,7 +272,7 @@ export namespace Installation {
 
     if (detectedMethod === "choco") {
       return fetch(
-        "https://community.chocolatey.org/api/v2/Packages?$filter=Id%20eq%20%27opencode%27%20and%20IsLatestVersion&$select=Version",
+        "https://community.chocolatey.org/api/v2/Packages?$filter=Id%20eq%20%27orbi%27%20and%20IsLatestVersion&$select=Version",
         { headers: { Accept: "application/json;odata=verbose" } },
       )
         .then((res) => {
@@ -283,7 +283,7 @@ export namespace Installation {
     }
 
     if (detectedMethod === "scoop") {
-      return fetch("https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/opencode.json", {
+      return fetch("https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/orbi.json", {
         headers: { Accept: "application/json" },
       })
         .then((res) => {
@@ -293,7 +293,7 @@ export namespace Installation {
         .then((data: any) => data.version)
     }
 
-    return fetch("https://api.github.com/repos/anomalyco/opencode/releases/latest")
+    return fetch("https://api.github.com/repos/anomalyco/orbi/releases/latest")
       .then((res) => {
         if (!res.ok) throw new Error(res.statusText)
         return res.json()

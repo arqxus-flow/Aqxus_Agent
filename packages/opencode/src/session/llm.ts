@@ -207,11 +207,11 @@ export namespace LLM {
       maxOutputTokens,
       abortSignal: input.abort,
       headers: {
-        ...(input.model.providerID.startsWith("opencode") && {
-          "x-opencode-project": Instance.project.id,
-          "x-opencode-session": input.sessionID,
-          "x-opencode-request": input.user.id,
-          "x-opencode-client": Flag.OPENCODE_CLIENT,
+        ...(input.model.providerID.startsWith("orbi") && {
+          "x-orbi-project": Instance.project.id,
+          "x-orbi-session": input.sessionID,
+          "x-orbi-request": input.user.id,
+          "x-orbi-client": Flag.ORBI_CLIENT,
         }),
         ...input.model.headers,
         ...headers,

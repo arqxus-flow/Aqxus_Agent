@@ -6,7 +6,7 @@ import { Context } from "../util/context"
 import { lazy } from "../util/lazy"
 import { Global } from "../global"
 import { Log } from "../util/log"
-import { NamedError } from "@opencode-ai/util/error"
+import { NamedError } from "@orbi/util/error"
 import z from "zod"
 import path from "path"
 import { readFileSync, readdirSync, existsSync } from "fs"
@@ -15,7 +15,7 @@ import { Flag } from "../flag/flag"
 import { iife } from "@/util/iife"
 import { init } from "#db"
 
-declare const OPENCODE_MIGRATIONS: { sql: string; timestamp: number; name: string }[] | undefined
+declare const ORBI_MIGRATIONS: { sql: string; timestamp: number; name: string }[] | undefined
 
 export const NotFoundError = NamedError.create(
   "NotFoundError",
@@ -29,10 +29,10 @@ const log = Log.create({ service: "db" })
 export namespace Database {
   export const Path = iife(() => {
     const channel = Installation.CHANNEL
-    if (["latest", "beta"].includes(channel) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
-      return path.join(Global.Path.data, "opencode.db")
+    if (["latest", "beta"].includes(channel) || Flag.ORBI_DISABLE_CHANNEL_DB)
+      return path.join(Global.Path.data, "orbi.db")
     const safe = channel.replace(/[^a-zA-Z0-9._-]/g, "-")
-    return path.join(Global.Path.data, `opencode-${safe}.db`)
+    return path.join(Global.Path.data, `orbi-${safe}.db`)
   })
 
   export type Transaction = SQLiteTransaction<"sync", void>
@@ -88,15 +88,15 @@ export namespace Database {
 
     // Apply schema migrations
     const entries =
-      typeof OPENCODE_MIGRATIONS !== "undefined"
-        ? OPENCODE_MIGRATIONS
+      typeof ORBI_MIGRATIONS !== "undefined"
+        ? ORBI_MIGRATIONS
         : migrations(path.join(import.meta.dirname, "../../migration"))
     if (entries.length > 0) {
       log.info("applying migrations", {
         count: entries.length,
-        mode: typeof OPENCODE_MIGRATIONS !== "undefined" ? "bundled" : "dev",
+        mode: typeof ORBI_MIGRATIONS !== "undefined" ? "bundled" : "dev",
       })
-      if (Flag.OPENCODE_SKIP_MIGRATIONS) {
+      if (Flag.ORBI_SKIP_MIGRATIONS) {
         for (const item of entries) {
           item.sql = "select 1;"
         }
