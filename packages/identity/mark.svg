@@ -1,7 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512"><svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="512" height="512" fill="#131010"></rect>
-<path d="M320 224V352H192V224H320Z" fill="#5A5858"></path>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z" fill="white"></path>
-</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
-@media (prefers-color-scheme: dark) { :root { filter: none; } }
-</style></svg>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="1024.000000pt" height="1024.000000pt" viewBox="0 0 1024.000000 1024.000000"
+ preserveAspectRatio="xMidYMid meet">
+
+<g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)"
+fill="#000000" stroke="none">
+<path d="M3881 6654 c-165 -44 -306 -192 -341 -357 -7 -36 -10 -403 -8 -1197
+l3 -1145 23 -56 c50 -124 157 -231 280 -281 l57 -23 1205 -3 c1176 -2 1207 -2
+1270 17 118 36 234 131 286 233 54 107 54 93 54 1289 0 711 -4 1125 -10 1160
+-33 172 -162 310 -339 363 -49 14 -178 16 -1240 15 -1003 0 -1194 -3 -1240
+-15z m1459 -434 c515 -105 880 -551 880 -1074 0 -499 -337 -937 -819 -1063
+-119 -31 -318 -42 -442 -23 -342 49 -655 274 -813 580 -136 265 -160 556 -69
+845 69 219 230 434 422 564 121 82 313 159 461 184 77 13 288 6 380 -13z"/>
+</g>
+</svg>
