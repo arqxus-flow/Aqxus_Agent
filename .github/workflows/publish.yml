@@ -29,6 +29,7 @@ permissions:
 jobs:
   # ─── 1. Create draft release ───────────────────────────────────────
   version:
+    if: github.repository == 'arqxus-flow/Aqxus_Agent'
     runs-on: ubuntu-latest
     steps:
       - name: Determine version
@@ -252,8 +253,8 @@ jobs:
                 echo "✅ Published $name@$version"
                 return 0
               fi
-              echo "⚠️ Failed, waiting 120s before retry..."
-              sleep 120
+              echo "⚠️ Failed, waiting 180s before retry..."
+              sleep 180
             done
             echo "❌ Failed to publish $name after 3 attempts"
           }
@@ -267,7 +268,7 @@ jobs:
               npm pack
               publish_pkg "$PKG_NAME" "$VERSION"
               cd -
-              sleep 15
+              sleep 30
             fi
           done
 
@@ -302,7 +303,7 @@ jobs:
 
           cd dist/orbi
           npm pack
-          sleep 30
+          sleep 60
           publish_pkg "orbi-ai" "$VERSION"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
