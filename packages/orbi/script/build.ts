@@ -66,61 +66,13 @@ const allTargets: {
   abi?: "musl"
   avx2?: false
 }[] = [
-  {
-    os: "linux",
-    arch: "arm64",
-  },
-  {
-    os: "linux",
-    arch: "x64",
-  },
-  {
-    os: "linux",
-    arch: "x64",
-    avx2: false,
-  },
-  {
-    os: "linux",
-    arch: "arm64",
-    abi: "musl",
-  },
-  {
-    os: "linux",
-    arch: "x64",
-    abi: "musl",
-  },
-  {
-    os: "linux",
-    arch: "x64",
-    abi: "musl",
-    avx2: false,
-  },
-  {
-    os: "darwin",
-    arch: "arm64",
-  },
-  {
-    os: "darwin",
-    arch: "x64",
-  },
-  {
-    os: "darwin",
-    arch: "x64",
-    avx2: false,
-  },
-  {
-    os: "win32",
-    arch: "arm64",
-  },
-  {
-    os: "win32",
-    arch: "x64",
-  },
-  {
-    os: "win32",
-    arch: "x64",
-    avx2: false,
-  },
+  // Essential targets only (4 platforms)
+  { os: "darwin", arch: "arm64" },     // macOS Apple Silicon (M1+)
+  { os: "darwin", arch: "x64" },       // macOS Intel
+  { os: "linux", arch: "x64" },        // Linux x64 (servers/devs)
+  { os: "win32", arch: "x64" },        // Windows x64 (clients)
+  // Removed: linux-arm64, all musl variants, all baseline variants, windows-arm64
+  // Re-add if clients need them
 ]
 
 const targets = singleFlag
