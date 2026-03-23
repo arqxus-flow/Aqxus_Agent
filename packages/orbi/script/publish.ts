@@ -8,9 +8,38 @@ const dir = fileURLToPath(new URL("..", import.meta.url))
 process.chdir(dir)
 
 const version = Script.version
-console.log(`Publishing orbi-ai@${version} (wrapper only — binaries served from GitHub Releases)`)
+const channel = Script.channel
 
-// Build wrapper package
+console.log(`Publishing Orbi packages @${version}`)
+
+// ─── 1. Build and publish @orbi/sdk ──────────────────────────────
+console.log("\n📦 Building @orbi/sdk...")
+await $`bun run build`.cwd("../../packages/sdk/js")
+const sdkDistDir = "../../packages/sdk/js"
+const sdkPkg = await Bun.file(`${sdkDistDir}/package.json`).json()
+// Set version
+sdkPkg.version = version
+sdkPkg.exports = { ".": "./dist/index.js", "./client": "./dist/client.js", "./server": "./dist/server.js" }
+await Bun.file(`${sdkDistDir}/package.json`).write(JSON.stringify(sdkPkg, null, 2))
+await $`bun pm pack`.cwd(sdkDistDir)
+await $`npm publish *.tgz --access public --tag ${channel}`.cwd(sdkDistDir)
+console.log(`✅ Published @orbi/sdk@${version}`)
+
+// ─── 2. Build and publish @orbi/plugin ───────────────────────────
+console.log("\n📦 Building @orbi/plugin...")
+await $`bun run build`.cwd("../../packages/plugin")
+const pluginDistDir = "../../packages/plugin"
+const pluginPkg = await Bun.file(`${pluginDistDir}/package.json`).json()
+// Set version and resolve workspace dependency
+pluginPkg.version = version
+pluginPkg.dependencies = { ...pluginPkg.dependencies, "@orbi/sdk": version }
+await Bun.file(`${pluginDistDir}/package.json`).write(JSON.stringify(pluginPkg, null, 2))
+await $`bun pm pack`.cwd(pluginDistDir)
+await $`npm publish *.tgz --access public --tag ${channel}`.cwd(pluginDistDir)
+console.log(`✅ Published @orbi/plugin@${version}`)
+
+// ─── 3. Build and publish orbi-ai (CLI wrapper) ──────────────────
+console.log("\n📦 Building orbi-ai wrapper...")
 await $`mkdir -p ./dist/${pkg.name}`
 await $`cp -r ./bin ./dist/${pkg.name}/bin`
 await $`cp ./script/postinstall.mjs ./dist/${pkg.name}/postinstall.mjs`
@@ -34,9 +63,9 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
   ),
 )
 
-// Publish wrapper only — 1 tiny package, no rate limit
 await $`chmod -R 755 .`.cwd(`./dist/${pkg.name}`)
 await $`bun pm pack`.cwd(`./dist/${pkg.name}`)
-await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(`./dist/${pkg.name}`)
-
+await $`npm publish *.tgz --access public --tag ${channel}`.cwd(`./dist/${pkg.name}`)
 console.log(`✅ Published orbi-ai@${version}`)
+
+console.log(`\n🎉 All packages published successfully!`)
