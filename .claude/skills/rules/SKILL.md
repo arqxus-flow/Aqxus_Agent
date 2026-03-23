@@ -154,3 +154,4 @@ paths:
 |------|--------|-------|---------|
 | `fork-safety.md` | Regras globais do fork: build, git, rebrand, packages | `**/*` | Sim |
 | `style.md` | Style guide TypeScript: nomes, const, early return, Bun APIs | `packages/**/*.ts`, `packages/**/*.tsx` | Nao |
+| `ci-cd.md` | CI/CD: release, signing keys, secrets, updater, workflows | `.github/**/*`, `packages/desktop*/**/*`, `script/**/*` | Nao |
