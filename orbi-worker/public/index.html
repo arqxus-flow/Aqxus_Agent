@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orbi Cowork</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+    }
+    .install-box {
+      background: #141414;
+      border: 1px solid #282828;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .install-label {
+      color: #666;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+    .install-cmd {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.95rem;
+      color: #4ade80;
+      word-break: break-all;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .install-cmd:hover { color: #86efac; }
+    .install-cmd::before {
+      content: '$ ';
+      color: #555;
+    }
+    .divider {
+      color: #333;
+      font-size: 0.8rem;
+      margin: 1rem 0;
+    }
+    .links {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    .links a {
+      color: #666;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .links a:hover { color: #fafafa; }
+    .copied {
+      color: #4ade80 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Orbi</h1>
+    <p class="subtitle">Agente de IA para gestao empresarial</p>
+
+    <div class="install-box">
+      <div class="install-label">Instalar via terminal</div>
+      <div class="install-cmd" onclick="copyCmd(this, 'curl -fsSL https://orbicowork.arqxus.com/install | bash')">curl -fsSL https://orbicowork.arqxus.com/install | bash</div>
+    </div>
+
+    <div class="install-box">
+      <div class="install-label">Instalar via npm</div>
+      <div class="install-cmd" onclick="copyCmd(this, 'npm i -g orbi-ai')">npm i -g orbi-ai</div>
+    </div>
+
+    <div class="links">
+      <a href="https://github.com/arqxus-flow/Aqxus_Agent">GitHub</a>
+      <a href="https://github.com/arqxus-flow/Aqxus_Agent/releases/latest">Download</a>
+      <a href="https://arqxus.com">Arqxus</a>
+    </div>
+  </div>
+
+  <script>
+    function copyCmd(el, text) {
+      navigator.clipboard.writeText(text)
+      const original = el.textContent
+      el.textContent = 'copiado!'
+      el.classList.add('copied')
+      setTimeout(() => {
+        el.textContent = original
+        el.classList.remove('copied')
+      }, 1500)
+    }
+  </script>
+</body>
+</html>
