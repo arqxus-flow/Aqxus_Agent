@@ -6,11 +6,12 @@ Fork do OpenCode renomeado para **Orbi**. Agente de IA para gestao empresarial.
 - **Branch:** main
 - **Namespace:** @orbi
 - **Runtime:** Bun
+- **Site:** https://orbicowork.arqxus.com
 - **Log de mudancas:** FORK_LOG.md (gitignored, local)
 
 ## Stack
 
-Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel AI SDK (LLM) + Zod (validacao) + Tauri/Electron (desktop)
+Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel AI SDK (LLM) + Zod (validacao) + Tauri (desktop)
 
 ## Commands
 
@@ -19,9 +20,26 @@ Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel
 - `cd packages/orbi && bun test` — testes (nunca do root)
 - `bun install` — instalar dependencias
 - `cd knowledge && npm run seed -- /Users/arthuraquino/opencode` — reseed Cortex Graph
-- Release manual: GitHub Actions → publish → Run workflow → digitar versao
-- Release por tag: `git tag v0.0.3 && git push origin v0.0.3` (CI dispara automatico)
-- Web dev: `./packages/orbi/dist/orbi-darwin-arm64/bin/orbi web` + `cd packages/app && bun dev`
+- Release: `git tag v0.0.X && git push origin v0.0.X --no-verify` (CI dispara automatico)
+- Web dev: `orbi web` + `cd packages/app && bun dev`
+
+## Distribuicao
+
+```
+curl -fsSL https://orbicowork.arqxus.com/install | bash  → GitHub Releases
+npm i -g orbi-ai                                          → npm (wrapper leve)
+docker run -it ghcr.io/arqxus-flow/orbi                   → Docker
+GitHub Releases                                            → .dmg/.exe/.AppImage (Tauri)
+```
+
+## CI/CD
+
+- **Runners:** Blacksmith (free, open source plan)
+- **Trigger:** push tag v*
+- **publish.ts:** publica @orbi/sdk, @orbi/plugin, orbi-ai no npm
+- **Binarios CLI:** vao pro GitHub Releases (NAO pro npm — rate limit)
+- **Docker:** ghcr.io/arqxus-flow/orbi
+- **Tauri:** 4 plataformas (mac arm64/x64, win x64, linux x64)
 
 ## Estrutura principal
 
@@ -29,12 +47,13 @@ Bun + TypeScript + Hono (server) + Solid.js (UI) + Drizzle ORM (SQLite) + Vercel
 packages/orbi/       → Core (CLI + servidor + agentes + tools + loop principal)
 packages/app/        → Web UI (Solid.js, compartilhada entre web e desktop)
 packages/desktop/    → Desktop Tauri (Mac/Win/Linux)
-packages/desktop-electron/ → Desktop Electron
+packages/desktop-electron/ → Desktop Electron (desabilitado)
+packages/sdk/        → SDK cliente TypeScript (@orbi/sdk)
+packages/plugin/     → Sistema de plugins (@orbi/plugin)
 packages/ui/         → Componentes UI compartilhados
-packages/sdk/        → SDK cliente TypeScript
-packages/plugin/     → Sistema de plugins
 packages/util/       → Utilitarios
 packages/web/        → Site docs (Astro)
+orbi-worker/         → Cloudflare Worker (landing page + /install)
 ```
 
 ## Nao faca
@@ -44,6 +63,7 @@ packages/web/        → Site docs (Astro)
 - NAO mexer em `packages/enterprise` ou `packages/function` por enquanto
 - NAO commitar sem rodar build antes
 - NAO fazer push sem `--no-verify` se husky bloquear por packages removidos
+- NAO publicar binarios grandes no npm — usar GitHub Releases + postinstall
 
 ## Fluxo de Trabalho
 
@@ -94,3 +114,4 @@ Top arquivos por PageRank (hub central do codigo):
 ## Bugs corrigidos
 
 - **Desktop markdown tables**: nativeParser desativado em Electron e Tauri. Usa jsParser (igual web). Commit 90dc0a8c8
+- **bin/orbi launcher**: refs opencode → orbi (package names, binary, cached path, env var). Commit 7f4cf52b5

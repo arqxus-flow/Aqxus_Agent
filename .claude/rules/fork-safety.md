@@ -16,7 +16,7 @@ paths:
 - Prefix de commits: `chore:`, `fix:`, `feat:`, `docs:`
 - Push com `--no-verify` se husky bloquear por typecheck de packages removidos
 - Atualizar FORK_LOG.md com o que foi feito
-- Release: Actions → publish → Run workflow → digitar versao (ex: 0.0.3)
+- Release: `git tag v0.0.X && git push origin v0.0.X --no-verify`
 - Web dev mode: `orbi web` (API porta 4096) + `cd packages/app && bun dev` (frontend porta 3000)
 
 ## Gotchas

@@ -3,92 +3,43 @@ paths:
   - ".github/**/*"
   - "packages/desktop/src-tauri/**/*"
   - "packages/desktop-electron/**/*"
-  - "script/**/*"
+  - "packages/orbi/script/publish.ts"
+  - "packages/orbi/script/postinstall.mjs"
+  - "packages/orbi/Dockerfile"
+  - "install.sh"
 ---
 
 # CI/CD — Build, Release e Distribuicao
 
 ## Conventions
 
-- Release manual: GitHub Actions → publish → Run workflow → digitar versao
 - Release por tag: `git tag v0.0.X && git push origin v0.0.X --no-verify`
-- Electron desabilitado no CI pra economizar minutos (reativar quando necessario)
-- Tauri e o desktop principal
+- Runners: Blacksmith (free, open source plan) — IPs dedicados, builds mais rapidos
+- Binarios CLI NAO vao pro npm — vao pro GitHub Releases. npm recebe so wrapper leve
+- publish.ts publica 3 pacotes no npm: @orbi/sdk, @orbi/plugin, orbi-ai
+- postinstall.mjs baixa binario do GitHub Releases (abordagem esbuild/Sentry)
+- Docker image: ghcr.io/arqxus-flow/orbi (Alpine + ripgrep)
+- Electron desabilitado no CI (reativar quando necessario)
+- Tauri e o desktop principal — 4 plataformas (mac arm64/x64, win x64, linux x64)
 - Sem certificado Apple/Windows por enquanto — apps mostram aviso no OS
-- `xattr -cr /Applications/Orbi.app` pra abrir no macOS sem certificado
 
-## Setup Completo (feito em 2026-03-22)
+## Distribuicao
 
-### 1. Signing keys do Tauri Updater
+| Canal | Comando | Fonte |
+|-------|---------|-------|
+| curl | `curl -fsSL https://orbicowork.arqxus.com/install \| bash` | GitHub Releases |
+| npm | `npm i -g orbi-ai` | npm (wrapper) + GitHub Releases (binario) |
+| Docker | `docker run -it ghcr.io/arqxus-flow/orbi` | ghcr.io |
+| Desktop | Download .dmg/.exe | GitHub Releases (Tauri) |
 
-```bash
-# Gerar par de chaves (pede password — anotar!)
-cargo tauri signer generate -w ~/.tauri/orbi.key
+## Secrets no GitHub
 
-# Chave privada: ~/.tauri/orbi.key (NUNCA compartilhar)
-# Chave publica: ~/.tauri/orbi.key.pub (segura, vai no config)
-
-# Ver chave publica
-cat ~/.tauri/orbi.key.pub
-
-# Ver chave privada (pra colar no GitHub secret)
-cat ~/.tauri/orbi.key
-```
-
-### 2. Secrets no GitHub
-
-Ir em: github.com/arqxus-flow/Aqxus_Agent → Settings → Secrets and variables → Actions
-
-| Secret | Valor | Obrigatorio |
-|--------|-------|-------------|
-| `TAURI_SIGNING_PRIVATE_KEY` | Conteudo de `~/.tauri/orbi.key` (sem % do terminal) | Sim (pro updater) |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Password digitada ao gerar | Sim (pro updater) |
-| `APPLE_CERTIFICATE` | p12 base64 | Nao (futuro, $99/ano) |
-| `APPLE_CERTIFICATE_PASSWORD` | Password do p12 | Nao (futuro) |
-| `APPLE_API_KEY` | Key ID da Apple | Nao (futuro) |
-| `APPLE_API_KEY_PATH` | Conteudo do .p8 | Nao (futuro) |
-| `APPLE_API_ISSUER` | Issuer ID | Nao (futuro) |
-| `NPM_TOKEN` | Token do npm | Nao (futuro) |
-
-### 3. Configs alterados
-
-```
-# Tauri updater — pubkey e endpoint
-packages/desktop/src-tauri/tauri.prod.conf.json
-  → pubkey: conteudo do ~/.tauri/orbi.key.pub
-  → endpoints: ["https://github.com/arqxus-flow/Aqxus_Agent/releases/latest/download/latest.json"]
-  → createUpdaterArtifacts: true
-
-# Electron publish target
-packages/desktop-electron/electron-builder.config.ts
-  → publish.owner: "arqxus-flow"
-  → publish.repo: "Aqxus_Agent"
-
-# Workflow
-.github/workflows/publish.yml
-  → Triggers: workflow_dispatch + push tags v*
-  → Runners: ubuntu-latest, macos-latest, windows-latest (free)
-  → Auth: github.token (automatico)
-  → Jobs: version → build-cli → build-tauri → finalize
-  → Electron: desabilitado (economizar minutos)
-```
-
-### 4. Icones Electron Windows
-
-```bash
-# Electron precisa icon.ico com 256x256 minimo pra Windows
-magick mark-512x512.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico
-```
-
-## Gotchas
-
-- **% no final da chave**: `cat ~/.tauri/orbi.key` mostra `%` no final — e o prompt do zsh, NAO faz parte da chave. Nao colar no secret
-- **Secrets vazios**: Nunca passar secrets como env vars se podem ser vazios (ex: `APPLE_CERTIFICATE: ${{ secrets.X }}`). Electron-builder e Tauri tentam usar e falham. Comentar ou usar `CSC_IDENTITY_AUTO_DISCOVERY: "false"`
-- **fetch-tags no checkout**: `actions/checkout@v4` com `fetch-tags: true` conflita quando o trigger e uma tag. Remover `fetch-tags`
-- **Repo privado**: Updater nao funciona com repo privado (latest.json precisa ser publico). Opcoes: repo publico ou hospedar assets no Cloudflare R2
-- **Updater so funciona entre versoes corretas**: App buildado com config antigo (pubkey/endpoint errado) nao detecta updates. Precisa instalar versao com config correto primeiro
-- **createUpdaterArtifacts**: Precisa de TAURI_SIGNING_PRIVATE_KEY. Sem a key, build falha com "failed to decode secret key"
-- **Minutos do Actions**: Plano free = 2.000 min/mes. Cada release com Tauri gasta ~100 min (sem Electron). Com Electron seria ~200 min
+| Secret | Obrigatorio |
+|--------|-------------|
+| `NPM_TOKEN` | Sim (npm publish) |
+| `TAURI_SIGNING_PRIVATE_KEY` | Sim (updater) |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Sim (updater) |
+| `APPLE_CERTIFICATE` + relacionados | Nao (futuro, $99/ano) |
 
 ## Fluxo de Release
 
@@ -96,35 +47,42 @@ magick mark-512x512.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico
 1. Fazer mudancas no codigo
 2. Commit + push
 3. git tag v0.0.X && git push origin v0.0.X --no-verify
-4. CI dispara automaticamente (~30 min)
-5. Release publicada em github.com/arqxus-flow/Aqxus_Agent/releases
-6. Usuarios com app v0.0.3+ recebem update automatico via "Verificar agora"
+4. CI dispara automaticamente:
+   - version: cria draft release
+   - build-cli: builda binarios (Blacksmith)
+   - build-tauri: builda desktop (4 plataformas)
+   - publish-npm: publica @orbi/sdk, @orbi/plugin, orbi-ai
+   - build-docker: builda e pusha imagem Docker
+   - finalize: undraft release
+5. Release publicada com assets
 ```
 
-## Fluxo de Release Manual
+## Gotchas
 
-```
-1. GitHub → Actions → publish → Run workflow
-2. Digitar versao (ex: 0.0.5)
-3. Run workflow
-4. Esperar ~30 min
-5. Release publicada
-```
+- **npm rate limit**: 25 publishes/24h por conta. NAO publicar binarios no npm — usar GitHub Releases
+- **"user undefined" no npm**: e so como o npm formata erro de rate limit, nao e problema de auth
+- **Blacksmith migration wizard**: pode trocar target ao inves de host na matrix. Verificar manualmente
+- **% no final da chave**: `cat ~/.tauri/orbi.key` mostra `%` no final — e o prompt do zsh, NAO faz parte da chave
+- **Secrets vazios**: Nunca passar secrets como env vars se podem ser vazios. Electron-builder e Tauri tentam usar e falham
+- **fetch-tags no checkout**: `actions/checkout@v4` com `fetch-tags: true` conflita quando o trigger e uma tag
+- **createUpdaterArtifacts**: Precisa de TAURI_SIGNING_PRIVATE_KEY. Sem a key, build falha
+- **macOS Gatekeeper**: `xattr -cr /Applications/Orbi.app` ou codesign ad-hoc: `codesign --force --sign - binario`
 
 ## Web UI (Cloudflare Pages)
-
-`orbi web` faz proxy do frontend pra Cloudflare Pages. Dados 100% locais — Pages serve so arquivos estaticos.
 
 ```
 # Projeto Pages: orbi-app
 # URL: orbi-app.pages.dev
+# Deploy: cd packages/app && bun run build && npx wrangler pages deploy dist --project-name orbi-app
+# Proxy: packages/orbi/src/server/server.ts → proxy("https://orbi-app.pages.dev")
+```
 
-# Deploy manual (apos mudancas no frontend):
-cd packages/app && bun run build
-npx wrangler pages deploy dist --project-name orbi-app
+## Landing Page + Install (Cloudflare Worker)
 
-# Proxy configurado em:
-# packages/orbi/src/server/server.ts → proxy("https://orbi-app.pages.dev")
-# Precisa rebuild do CLI apos mudar a URL:
-# cd packages/orbi && bun run script/build.ts --single
+```
+# Worker: orbi-worker (em /orbi-worker/)
+# URL: orbicowork.arqxus.com
+# /install → serve install.sh do GitHub
+# / → landing page minimalista
+# Deploy: cd orbi-worker && npm run deploy
 ```
