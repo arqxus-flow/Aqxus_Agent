@@ -30,7 +30,7 @@ jobs:
   # ─── 1. Create draft release ───────────────────────────────────────
   version:
     if: github.repository == 'arqxus-flow/Aqxus_Agent'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Determine version
         id: vars
@@ -70,7 +70,7 @@ jobs:
   # ─── 2. Build CLI (cross-compiles all platforms on ubuntu) ─────────
   build-cli:
     needs: version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
 
@@ -103,7 +103,7 @@ jobs:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
           - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+            target: blacksmith-4vcpu-ubuntu-2404
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v4
@@ -213,7 +213,7 @@ jobs:
   # ─── 5. Publish to npm ──────────────────────────────────────────────
   publish-npm:
     needs: [version, build-cli]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
 
@@ -239,7 +239,7 @@ jobs:
   # ─── 6. Finalize — undraft the release ─────────────────────────────
   finalize:
     needs: [version, build-cli, build-tauri, publish-npm]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Publish release
         run: |
