@@ -500,11 +500,11 @@ export namespace Server {
       .all("/*", async (c) => {
         const path = c.req.path
 
-        const response = await proxy(`https://app.orbicowork.arqxus.com${path}`, {
+        const response = await proxy(`https://orbi-app.pages.dev${path}`, {
           ...c.req,
           headers: {
             ...c.req.raw.headers,
-            host: "app.orbicowork.arqxus.com",
+            host: "orbi-app.pages.dev",
           },
         })
         response.headers.set(

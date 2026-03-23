@@ -110,3 +110,21 @@ magick mark-512x512.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico
 4. Esperar ~30 min
 5. Release publicada
 ```
+
+## Web UI (Cloudflare Pages)
+
+`orbi web` faz proxy do frontend pra Cloudflare Pages. Dados 100% locais — Pages serve so arquivos estaticos.
+
+```
+# Projeto Pages: orbi-app
+# URL: orbi-app.pages.dev
+
+# Deploy manual (apos mudancas no frontend):
+cd packages/app && bun run build
+npx wrangler pages deploy dist --project-name orbi-app
+
+# Proxy configurado em:
+# packages/orbi/src/server/server.ts → proxy("https://orbi-app.pages.dev")
+# Precisa rebuild do CLI apos mudar a URL:
+# cd packages/orbi && bun run script/build.ts --single
+```
