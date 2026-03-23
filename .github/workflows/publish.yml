@@ -241,6 +241,7 @@ jobs:
               npm pack
               npm publish *.tgz --access public --tag latest || true
               cd -
+              sleep 10
             fi
           done
 
