@@ -209,9 +209,79 @@ jobs:
   #   needs: [build-cli, version]
   #   ... (código preservado no git history, commit anterior)
 
-  # ─── 5. Finalize — undraft the release ─────────────────────────────
+  # ─── 5. Publish to npm ──────────────────────────────────────────────
+  publish-npm:
+    needs: [version, build-cli]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-bun
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: orbi-cli
+          path: packages/orbi/dist
+
+      - name: Publish CLI to npm
+        run: |
+          cd packages/orbi
+
+          # Publish platform-specific packages
+          for dir in dist/orbi-*/; do
+            if [ -f "$dir/package.json" ]; then
+              echo "Publishing $dir..."
+              chmod -R 755 "$dir"
+              cd "$dir"
+              npm pack
+              npm publish *.tgz --access public --tag latest || true
+              cd -
+            fi
+          done
+
+          # Create and publish wrapper package (orbi-ai)
+          mkdir -p dist/orbi
+          cp -r bin dist/orbi/bin
+          cp script/postinstall.mjs dist/orbi/postinstall.mjs
+          cp ../../LICENSE dist/orbi/LICENSE
+
+          # Build wrapper package.json with optionalDependencies
+          node -e "
+            const fs = require('fs');
+            const binaries = {};
+            for (const dir of fs.readdirSync('dist')) {
+              const pkgPath = 'dist/' + dir + '/package.json';
+              if (dir.startsWith('orbi-') && fs.existsSync(pkgPath)) {
+                const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+                binaries[pkg.name] = pkg.version;
+              }
+            }
+            const wrapper = {
+              name: 'orbi-ai',
+              bin: { orbi: './bin/orbi' },
+              scripts: { postinstall: 'node ./postinstall.mjs' },
+              version: '${{ needs.version.outputs.version }}',
+              license: 'MIT',
+              optionalDependencies: binaries
+            };
+            fs.writeFileSync('dist/orbi/package.json', JSON.stringify(wrapper, null, 2));
+            console.log('Wrapper package:', JSON.stringify(wrapper, null, 2));
+          "
+
+          cd dist/orbi
+          npm pack
+          npm publish *.tgz --access public --tag latest || true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ─── 6. Finalize — undraft the release ─────────────────────────────
   finalize:
-    needs: [version, build-cli, build-tauri]
+    needs: [version, build-cli, build-tauri, publish-npm]
     runs-on: ubuntu-latest
     steps:
       - name: Publish release
