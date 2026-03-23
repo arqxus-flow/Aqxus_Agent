@@ -230,82 +230,10 @@ jobs:
           path: packages/orbi/dist
 
       - name: Publish CLI to npm
-        run: |
-          cd packages/orbi
-          VERSION="${{ needs.version.outputs.version }}"
-
-          # Function: check if package@version already exists on npm
-          is_published() {
-            npm view "$1@$2" version >/dev/null 2>&1
-          }
-
-          # Function: publish with retry on 429
-          publish_pkg() {
-            local name="$1"
-            local version="$2"
-            if is_published "$name" "$version"; then
-              echo "⏭ $name@$version already published, skipping"
-              return 0
-            fi
-            for attempt in 1 2 3; do
-              echo "📦 Publishing $name@$version (attempt $attempt)..."
-              if npm publish *.tgz --access public --tag latest 2>&1; then
-                echo "✅ Published $name@$version"
-                return 0
-              fi
-              echo "⚠️ Failed, waiting 180s before retry..."
-              sleep 180
-            done
-            echo "❌ Failed to publish $name after 3 attempts"
-          }
-
-          # Publish platform-specific packages
-          for dir in dist/orbi-*/; do
-            if [ -f "$dir/package.json" ]; then
-              PKG_NAME=$(node -e "console.log(require('./$dir/package.json').name)")
-              chmod -R 755 "$dir"
-              cd "$dir"
-              npm pack
-              publish_pkg "$PKG_NAME" "$VERSION"
-              cd -
-              sleep 30
-            fi
-          done
-
-          # Create and publish wrapper package (orbi-ai)
-          mkdir -p dist/orbi
-          cp -r bin dist/orbi/bin
-          cp script/postinstall.mjs dist/orbi/postinstall.mjs
-          cp ../../LICENSE dist/orbi/LICENSE
-
-          # Build wrapper package.json with optionalDependencies
-          node -e "
-            const fs = require('fs');
-            const binaries = {};
-            for (const dir of fs.readdirSync('dist')) {
-              const pkgPath = 'dist/' + dir + '/package.json';
-              if (dir.startsWith('orbi-') && fs.existsSync(pkgPath)) {
-                const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-                binaries[pkg.name] = pkg.version;
-              }
-            }
-            const wrapper = {
-              name: 'orbi-ai',
-              bin: { orbi: './bin/orbi' },
-              scripts: { postinstall: 'node ./postinstall.mjs' },
-              version: '$VERSION',
-              license: 'MIT',
-              optionalDependencies: binaries
-            };
-            fs.writeFileSync('dist/orbi/package.json', JSON.stringify(wrapper, null, 2));
-            console.log('Wrapper package:', JSON.stringify(wrapper, null, 2));
-          "
-
-          cd dist/orbi
-          npm pack
-          sleep 60
-          publish_pkg "orbi-ai" "$VERSION"
+        run: ./packages/orbi/script/publish.ts
         env:
+          ORBI_VERSION: ${{ needs.version.outputs.version }}
+          ORBI_RELEASE: ${{ needs.version.outputs.release }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # ─── 6. Finalize — undraft the release ─────────────────────────────
