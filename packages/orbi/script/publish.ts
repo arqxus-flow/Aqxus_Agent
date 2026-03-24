@@ -12,31 +12,32 @@ const channel = Script.channel
 
 console.log(`Publishing Orbi packages @${version}`)
 
-// ─── 1. Build and publish @orbi/sdk ──────────────────────────────
-console.log("\n📦 Building @orbi/sdk...")
+// ─── 1. Build and publish orbi-sdk ──────────────────────────────
+console.log("\n📦 Building orbi-sdk...")
 await $`bun run build`.cwd("../../packages/sdk/js")
 const sdkDistDir = "../../packages/sdk/js"
 const sdkPkg = await Bun.file(`${sdkDistDir}/package.json`).json()
-// Set version
+sdkPkg.name = "orbi-sdk"
 sdkPkg.version = version
 sdkPkg.exports = { ".": "./dist/index.js", "./client": "./dist/client.js", "./server": "./dist/server.js" }
 await Bun.file(`${sdkDistDir}/package.json`).write(JSON.stringify(sdkPkg, null, 2))
 await $`bun pm pack`.cwd(sdkDistDir)
 await $`npm publish *.tgz --access public --tag ${channel}`.cwd(sdkDistDir)
-console.log(`✅ Published @orbi/sdk@${version}`)
+console.log(`✅ Published orbi-sdk@${version}`)
 
-// ─── 2. Build and publish @orbi/plugin ───────────────────────────
-console.log("\n📦 Building @orbi/plugin...")
+// ─── 2. Build and publish orbi-plugin ───────────────────────────
+console.log("\n📦 Building orbi-plugin...")
 await $`bun run build`.cwd("../../packages/plugin")
 const pluginDistDir = "../../packages/plugin"
 const pluginPkg = await Bun.file(`${pluginDistDir}/package.json`).json()
-// Set version and resolve workspace dependency
+pluginPkg.name = "orbi-plugin"
 pluginPkg.version = version
-pluginPkg.dependencies = { ...pluginPkg.dependencies, "@orbi/sdk": version }
+pluginPkg.dependencies = { ...pluginPkg.dependencies, "orbi-sdk": version }
+delete pluginPkg.dependencies["@orbi/sdk"]
 await Bun.file(`${pluginDistDir}/package.json`).write(JSON.stringify(pluginPkg, null, 2))
 await $`bun pm pack`.cwd(pluginDistDir)
 await $`npm publish *.tgz --access public --tag ${channel}`.cwd(pluginDistDir)
-console.log(`✅ Published @orbi/plugin@${version}`)
+console.log(`✅ Published orbi-plugin@${version}`)
 
 // ─── 3. Build and publish orbi-ai (CLI wrapper) ──────────────────
 console.log("\n📦 Building orbi-ai wrapper...")
