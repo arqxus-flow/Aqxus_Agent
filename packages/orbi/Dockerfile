@@ -1,16 +1,10 @@
-FROM alpine AS base
+FROM debian:bookworm-slim
 
-ARG BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
-ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=${BUN_RUNTIME_TRANSPILER_CACHE_PATH}
-RUN apk add libgcc libstdc++ ripgrep
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ripgrep ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-FROM base AS build-amd64
 COPY dist/orbi-linux-x64/bin/orbi /usr/local/bin/orbi
+RUN chmod +x /usr/local/bin/orbi && orbi --version
 
-FROM base AS build-arm64
-COPY dist/orbi-linux-x64/bin/orbi /usr/local/bin/orbi
-
-ARG TARGETARCH
-FROM build-${TARGETARCH}
-RUN orbi --version
 ENTRYPOINT ["orbi"]
